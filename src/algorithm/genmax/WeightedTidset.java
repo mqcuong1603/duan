@@ -155,7 +155,7 @@ public class WeightedTidset {
         return result;
     }
 
-    /**8
+    /**
      * Computes an upper bound on the expected support of the intersection
      * of this tidset with another, without actually computing the full intersection.
      *

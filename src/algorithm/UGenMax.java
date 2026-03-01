@@ -136,19 +136,30 @@ public class UGenMax {
             minsup = seededThreshold * 0.5;
             System.out.println("  [UGenMax] Initial minsup (50% of seeded): "
                     + String.format("%.4f", minsup));
+
+            // Reset the heap after seeding. The seeding phase was only for
+            // estimating a good initial minsup. The actual Top-K heap must
+            // start fresh so it only contains real maximal itemsets found
+            // during the depth-first search. Without this reset, the seeded
+            // single-item entries (which may not be maximal) inflate the
+            // heap threshold and cause the search to prune valid results.
+            topKHeap = new TopKHeap(topK);
         }
 
         // --- Step 3 & 4: Filter items and run search ---
         // In Top-K mode, if fewer than K results found, retry with lower threshold
         int maxRetries = (topK > 0) ? 3 : 0;
         int attempt = 0;
+        double baseMinsup = minsup; // Track base minsup for retry calculations
 
         do {
             // --- Step 3: Get frequent items (expSup >= minsup), sorted ascending ---
             if (attempt > 0) {
                 // Lower threshold and reset for retry
-                minsup = minsup * 0.25; // Quarter the threshold
+                baseMinsup = baseMinsup * 0.25; // Quarter the base threshold
+                minsup = baseMinsup;
                 maximalItemsets.clear();
+                topKHeap = new TopKHeap(topK); // Fresh heap for each retry
                 nodesExplored = 0;
                 pruneAntiMonotone = 0;
                 pruneProgressiveFocus = 0;
