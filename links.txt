@@ -1,0 +1,15 @@
+What is a maximal itemset?
+https://data-mining.philippe-fournier-viger.com/what-is-a-maximal-itemset/
+
+What is a Closed Itemset and Why is it Useful?
+https://data-mining.philippe-fournier-viger.com/what-is-a-closed-itemset-and-why-is-it-useful/
+
+"Maximal, Closed and Generator Itemsets":
+https://www.philippe-fournier-viger.com/COURSES/Pattern_mining/Closed_maximal_itemsets.pdf
+
+What is a transaction database?
+What is support?
+What is a frequent itemset?
+What is a closed frequent itemset?
+What is a maximal frequent itemset?
+Why is maximal useful? (much smaller set, but lossy — you lose support info)
