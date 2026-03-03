@@ -50,7 +50,7 @@ import java.util.*;
  *   - Weighted tidsets intersected to compute expected support
  *   - Enumeration tree explored depth-first with tidset-based pruning
  *
- * @author [Your Name]
+ * @author Mã Quốc Cường, Nguyễn Cao Phi
  */
 public class UFPMax {
 

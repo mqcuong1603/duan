@@ -24,7 +24,7 @@ import java.util.*;
  *   2(0.5) 5(0.6)
  *   1(0.9) 2(0.75) 3(0.8) 5(0.7)
  * 
- * @author [Your Name]
+ * @author Mã Quốc Cường, Nguyễn Cao Phi
  */
 public class UncertainDatabase {
 
