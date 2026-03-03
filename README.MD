@@ -48,7 +48,7 @@ duan/
 
 | Requirement       | Details                                      |
 |-------------------|----------------------------------------------|
-| **Java**          | SE 21+                                       |
+| **Java**          | SE 21+ (developed and tested on SE 25)        |
 | **External libs** | None                                         |
 | **Build tools**   | None (no Maven / Gradle)                     |
 
@@ -219,3 +219,10 @@ Both algorithms produce the same 4 maximal frequent itemsets:
 {1, 2, 3, 5} (expSup=1.6200)
 {2, 3, 5}    (expSup=1.7390)
 ```
+
+---
+
+## Authors
+
+- **Mã Quốc Cường**
+- **Nguyễn Cao Phi**

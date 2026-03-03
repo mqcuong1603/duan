@@ -24,7 +24,7 @@ import java.io.IOException;
  *   java Main -algorithm UFPMax -input data.txt -output result.txt -minsup 1.5
  *   java Main -algorithm UGenMax -input data.txt -output result.txt -topk 10
  * 
- * @author [Your Name]
+ * @author Mã Quốc Cường, Nguyễn Cao Phi
  */
 public class Main {
 

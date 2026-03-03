@@ -14,7 +14,7 @@ package util;
  *   System.out.println("Time: " + tracker.getElapsedTimeMs() + " ms");
  *   System.out.println("Memory: " + tracker.getMemoryUsageMB() + " MB");
  *
- * @author [Your Name]
+ * @author Mã Quốc Cường, Nguyễn Cao Phi
  */
 public class PerformanceTracker {
 
@@ -96,7 +96,7 @@ public class PerformanceTracker {
      * @return memory usage in MB
      */
     public double getMemoryUsageMB() {
-        return (peakMemory - startMemory) / (1024.0 * 1024.0);
+        return Math.max(0, peakMemory - startMemory) / (1024.0 * 1024.0);
     }
 
     /**

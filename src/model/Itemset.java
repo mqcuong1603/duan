@@ -11,7 +11,7 @@ import java.util.Arrays;
  *
  * Items are stored in sorted order for consistent comparison and hashing.
  *
- * @author [Your Name]
+ * @author Mã Quốc Cường, Nguyễn Cao Phi
  */
 public class Itemset implements Comparable<Itemset> {
 

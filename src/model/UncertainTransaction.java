@@ -18,7 +18,7 @@ import java.util.Set;
  *   - Item 3 appears with probability 0.6
  *   - Item 4 appears with probability 0.9
  *
- * @author [Your Name]
+ * @author Mã Quốc Cường, Nguyễn Cao Phi
  */
 public class UncertainTransaction {
 
