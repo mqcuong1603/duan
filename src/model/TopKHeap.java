@@ -18,7 +18,7 @@ import java.util.PriorityQueue;
  * and the heap is full, the itemset with the lowest expected support
  * is removed if the new one is better.
  *
- * @author [Your Name]
+ * @author Mã Quốc Cường, Nguyễn Cao Phi
  */
 public class TopKHeap {
 

@@ -55,7 +55,7 @@ import java.util.*;
  *   5. At each leaf/dead-end, check maximality against known MFIs
  *   6. Return all maximal frequent itemsets (or Top-K results)
  *
- * @author [Your Name]
+ * @author Mã Quốc Cường, Nguyễn Cao Phi
  */
 public class UGenMax {
 
@@ -281,17 +281,22 @@ public class UGenMax {
         // Use a set to track what's already in the heap (prevent duplicates)
         Set<Itemset> seenItemsets = new HashSet<>();
 
+        int seedIdx = 0;
         for (Itemset candidate : seedCandidates) {
-            if (seenItemsets.contains(candidate)) continue;
+            if (seenItemsets.contains(candidate)) {
+                seedIdx++;
+                continue;
+            }
 
             if (topKHeap.offer(candidate)) {
                 seenItemsets.add(candidate);
             }
 
             // Once heap is full and threshold is established, stop early for efficiency
-            if (topKHeap.isFull() && seedCandidates.indexOf(candidate) > topK * 3) {
+            if (topKHeap.isFull() && seedIdx > topK * 3) {
                 break;
             }
+            seedIdx++;
         }
 
         // IMPORTANT: Do NOT add seeded items to maximalItemsets here.

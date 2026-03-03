@@ -22,7 +22,7 @@ import java.util.List;
  *
  * Entries are kept sorted by transaction ID for efficient O(n+m) intersection.
  *
- * @author [Your Name]
+ * @author Mã Quốc Cường, Nguyễn Cao Phi
  */
 public class WeightedTidset {
 

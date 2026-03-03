@@ -27,7 +27,7 @@ import java.util.Random;
  *   java DatasetConverter retail.txt retail_uncertain.txt medium 42
  *   java DatasetConverter chess.txt chess_uncertain.txt uniform
  *
- * @author [Your Name]
+ * @author Mã Quốc Cường, Nguyễn Cao Phi
  */
 public class DatasetConverter {
 
