@@ -1,228 +1,268 @@
-# Mining Top-K Frequent Maximal Itemsets in Uncertain Transaction Databases
+# Mining Frequent Maximal Itemsets from Uncertain Transaction Databases
 
-A comparative study of **UFPMax** and **UGenMax** — two algorithms for discovering
-frequent maximal itemsets (MFIs) from uncertain transaction databases, supporting
-both static minimum expected support and dynamic Top-K threshold modes.
+Four algorithms for discovering maximal frequent itemsets (MFIs) from uncertain
+transaction databases, covering two support models:
 
-In an uncertain database, each item in a transaction has an existential probability
-`P(item, t) in (0, 1]`. The **expected support** of an itemset X is:
+- **Expected support model:** UGenMax, UFPMax
+- **Probabilistic support model:** TODIS-MAX, APFI-MAX
 
-```
-expSup(X) = Sum over all transactions t of: Product of P(i, t) for each item i in X
-```
+## Requirements
 
-An itemset is **maximal frequent** if its expected support >= minsup and no proper
-superset is also frequent.
-
----
+- **Java** SE 21+ (developed on SE 25)
+- No external libraries, no Maven/Gradle
 
 ## Project Structure
 
 ```
 duan/
 ├── src/
-│   ├── Main.java                          # CLI entry point
+│   ├── Main.java                       # CLI entry point (all 4 algorithms)
+│   ├── DatasetConverter.java           # Convert standard datasets to uncertain format
 │   ├── algorithm/
-│   │   ├── UFPMax.java                    # FPMax adapted for uncertain data
-│   │   ├── UGenMax.java                   # GenMax adapted for uncertain data
+│   │   ├── UFPMax.java                 # FPMax for uncertain data (expected support)
+│   │   ├── UGenMax.java                # GenMax for uncertain data (expected support)
+│   │   ├── TODISMAX.java               # Exact probabilistic mining via DP
+│   │   ├── APFIMAX.java                # Approximate probabilistic mining via CLT
+│   │   ├── SupportPMF.java             # PMF/CLT utilities for probabilistic support
 │   │   └── genmax/
-│   │       └── WeightedTidset.java        # Weighted tidset for UGenMax
+│   │       └── WeightedTidset.java     # Weighted tidset data structure
 │   ├── model/
-│   │   ├── Itemset.java                   # Itemset with expected support
-│   │   ├── TopKHeap.java                  # Min-heap for Top-K tracking
-│   │   ├── UncertainDatabase.java         # Database loader and manager
-│   │   └── UncertainTransaction.java      # Single transaction with probabilities
+│   │   ├── Itemset.java                # Itemset with support value
+│   │   ├── TopKHeap.java               # Min-heap for Top-K tracking
+│   │   ├── UncertainDatabase.java      # Database loader
+│   │   └── UncertainTransaction.java   # Single transaction with probabilities
+│   ├── experiment/
+│   │   ├── ExperimentRunner.java       # Automated benchmark runner (all experiments)
+│   │   ├── ExpUFPMax.java              # Individual UFPMax experiment
+│   │   ├── ExpUGenMax.java             # Individual UGenMax experiment
+│   │   ├── ExpTODISMAX.java            # Individual TODIS-MAX experiment
+│   │   └── ExpAPFIMAX.java             # Individual APFI-MAX experiment
 │   └── util/
-│       └── PerformanceTracker.java        # Time and memory measurement
+│       └── PerformanceTracker.java     # Time and memory measurement
 ├── data/
-│   ├── contextUncertain.txt               # Small test dataset (5 transactions, 5 items)
-│   ├── mushroom_medium.txt                # Medium benchmark (8416 transactions, 120 items)
-│   ├── mushroom_low.txt                   # Low-uncertainty mushroom variant
-│   └── mushroom_high.txt                  # High-uncertainty mushroom variant
+│   ├── contextUncertain.txt            # Small test (5 txns, 5 items)
+│   ├── mushroom.txt                    # Standard mushroom (8,416 txns)
+│   ├── mushroom_high.txt               # Mushroom, high certainty (mu=0.8)
+│   ├── mushroom_medium.txt             # Mushroom, medium certainty (mu=0.5)
+│   ├── mushroom_low.txt                # Mushroom, low certainty (mu=0.3)
+│   ├── retail.txt                      # Standard retail (88,162 txns)
+│   └── accidents.txt                   # Standard accidents (340,183 txns)
+├── main.tex                            # LaTeX report
 └── README.MD
 ```
 
----
+## Quick Start
 
-## Requirements
-
-| Requirement       | Details                                      |
-|-------------------|----------------------------------------------|
-| **Java**          | SE 21+ (developed and tested on SE 25)        |
-| **External libs** | None                                         |
-| **Build tools**   | None (no Maven / Gradle)                     |
-
----
-
-## Build
+### 1. Build
 
 ```bash
 mkdir -p bin
-javac -d bin src/util/*.java src/model/*.java src/algorithm/genmax/*.java src/algorithm/*.java src/Main.java
+javac -d bin \
+  src/util/*.java \
+  src/model/*.java \
+  src/algorithm/genmax/*.java \
+  src/algorithm/*.java \
+  src/Main.java \
+  src/DatasetConverter.java \
+  src/experiment/*.java
 ```
 
----
+### 2. Generate uncertain datasets
 
-## Run
-
-### Static minimum expected support
+The repo includes `mushroom_high/medium/low.txt` already. To generate retail
+and accidents variants:
 
 ```bash
-# UFPMax with minsup = 1.5
+# Retail (88,162 transactions)
+java -cp bin DatasetConverter data/retail.txt data/retail_high.txt high 42
+java -cp bin DatasetConverter data/retail.txt data/retail_medium.txt medium 42
+java -cp bin DatasetConverter data/retail.txt data/retail_low.txt low 42
+
+# Accidents (340,183 transactions) — takes a minute
+java -cp bin DatasetConverter data/accidents.txt data/accidents_high.txt high 42
+java -cp bin DatasetConverter data/accidents.txt data/accidents_medium.txt medium 42
+java -cp bin DatasetConverter data/accidents.txt data/accidents_low.txt low 42
+```
+
+Distribution options: `high` (N(0.8, 0.1)), `medium` (N(0.5, 0.2)), `low` (N(0.3, 0.15)), `uniform`.
+
+### 3. Run algorithms via Main CLI
+
+```bash
+# --- Expected support model (UFPMax / UGenMax) ---
+
+# Static minsup
 java -cp bin Main -algorithm UFPMax -input data/contextUncertain.txt -output output.txt -minsup 1.5
-
-# UGenMax with minsup = 1.5
 java -cp bin Main -algorithm UGenMax -input data/contextUncertain.txt -output output.txt -minsup 1.5
+
+# Top-K mode
+java -cp bin Main -algorithm UGenMax -input data/mushroom_medium.txt -output output.txt -topk 10
+
+# --- Probabilistic support model (TODISMAX / APFIMAX) ---
+
+# Requires both -minsup (integer) and -minprob
+java -cp bin Main -algorithm TODISMAX -input data/mushroom_medium.txt -output output.txt -minsup 3000 -minprob 0.5
+java -cp bin Main -algorithm APFIMAX -input data/mushroom_medium.txt -output output.txt -minsup 3000 -minprob 0.5
 ```
 
-### Top-K mode (dynamic threshold)
+### 4. Run individual experiments (with stats output)
+
+Each experiment class loads a dataset, runs one algorithm, and prints results
+plus performance statistics (time, memory, pruning counts).
 
 ```bash
-# Find the Top-10 maximal frequent itemsets with highest expected support
-java -cp bin Main -algorithm UFPMax -input data/mushroom_medium.txt -output output.txt -topk 10
-java -cp bin Main -algorithm UGenMax -input data/mushroom_medium.txt -output output.txt -topk 10
+# Expected support experiments
+java -cp bin experiment.ExpUFPMax data/mushroom_medium.txt 2000
+java -cp bin experiment.ExpUGenMax data/mushroom_medium.txt 2000
+
+# Probabilistic experiments
+java -cp bin experiment.ExpTODISMAX data/mushroom_medium.txt 3000 0.5
+java -cp bin experiment.ExpAPFIMAX data/mushroom_medium.txt 3000 0.5
 ```
 
-### CLI options
+### 5. Run all benchmarks at once
 
-| Option       | Description                                                 |
-|--------------|-------------------------------------------------------------|
-| `-algorithm` | Algorithm to use: `UFPMax` or `UGenMax`                     |
-| `-input`     | Path to the uncertain transaction database file             |
-| `-output`    | Path to write results (SPMF-compatible format)              |
-| `-minsup`    | Minimum expected support threshold (e.g., `1.5`, `500`)     |
-| `-topk`      | Number of top maximal frequent itemsets to return            |
+This runs all 4 experiments across all datasets and parameter configurations,
+outputting CSV files to the `results/` directory:
 
-Either `-minsup` or `-topk` must be specified (not both).
+```bash
+java -Xmx4g -cp bin experiment.ExperimentRunner results
+```
 
----
+Outputs:
+- `results/exp1_expected_support.csv` — UFPMax vs UGenMax across minsup values
+- `results/exp2_probabilistic.csv` — TODISMAX vs APFIMAX across minsup/minprob
+- `results/exp3_uncertainty.csv` — High/medium/low uncertainty comparison
+- `results/exp4_scalability.csv` — Mushroom vs retail vs accidents
 
-## Input File Format
+## Testing the Entire Project
 
-Each line is one transaction. Items are separated by spaces. Each item is
-optionally followed by its existential probability in parentheses.
-Lines starting with `#` or `@` are ignored (comments/metadata).
+Here is a step-by-step script to build, generate data, and verify all algorithms:
 
-**Uncertain transactions:**
+```bash
+#!/bin/bash
+set -e
+
+echo "=== Step 1: Build ==="
+mkdir -p bin
+javac -d bin \
+  src/util/*.java \
+  src/model/*.java \
+  src/algorithm/genmax/*.java \
+  src/algorithm/*.java \
+  src/Main.java \
+  src/DatasetConverter.java \
+  src/experiment/*.java
+echo "Build OK"
+
+echo ""
+echo "=== Step 2: Generate uncertain datasets ==="
+java -cp bin DatasetConverter data/retail.txt data/retail_medium.txt medium 42
+java -cp bin DatasetConverter data/accidents.txt data/accidents_medium.txt medium 42
+echo "Datasets generated"
+
+echo ""
+echo "=== Step 3: Verify correctness on small dataset ==="
+java -cp bin Main -algorithm UFPMax  -input data/contextUncertain.txt -output /tmp/ufpmax_out.txt -minsup 1.0
+java -cp bin Main -algorithm UGenMax -input data/contextUncertain.txt -output /tmp/ugenmax_out.txt -minsup 1.0
+echo "UFPMax results:"
+cat /tmp/ufpmax_out.txt
+echo ""
+echo "UGenMax results:"
+cat /tmp/ugenmax_out.txt
+echo ""
+
+# Check both produce identical output
+if diff -q /tmp/ufpmax_out.txt /tmp/ugenmax_out.txt > /dev/null 2>&1; then
+  echo "PASS: UFPMax and UGenMax produce identical results"
+else
+  echo "FAIL: Results differ!"
+fi
+
+echo ""
+echo "=== Step 4: Test probabilistic algorithms ==="
+java -cp bin Main -algorithm TODISMAX -input data/contextUncertain.txt -output /tmp/todis_out.txt -minsup 2 -minprob 0.5
+java -cp bin Main -algorithm APFIMAX -input data/contextUncertain.txt -output /tmp/apfi_out.txt -minsup 2 -minprob 0.5
+echo "TODIS-MAX results:"
+cat /tmp/todis_out.txt
+echo ""
+echo "APFI-MAX results:"
+cat /tmp/apfi_out.txt
+
+echo ""
+echo "=== Step 5: Benchmark on mushroom ==="
+java -cp bin experiment.ExpUFPMax data/mushroom_medium.txt 2000
+echo ""
+java -cp bin experiment.ExpUGenMax data/mushroom_medium.txt 2000
+echo ""
+java -cp bin experiment.ExpTODISMAX data/mushroom_medium.txt 3000 0.5
+echo ""
+java -cp bin experiment.ExpAPFIMAX data/mushroom_medium.txt 3000 0.5
+
+echo ""
+echo "=== Step 6: Benchmark on retail ==="
+java -cp bin experiment.ExpUFPMax data/retail_medium.txt 3000
+echo ""
+java -cp bin experiment.ExpUGenMax data/retail_medium.txt 3000
+
+echo ""
+echo "=== Step 7: Full experiment suite (optional, takes a few minutes) ==="
+# Uncomment the next line to run all benchmarks:
+# java -Xmx4g -cp bin experiment.ExperimentRunner results
+
+echo ""
+echo "=== All tests complete ==="
+```
+
+Save this as `test.sh`, then run:
+
+```bash
+chmod +x test.sh
+./test.sh
+```
+
+## CLI Options
+
+| Option       | Description                                                    |
+|--------------|----------------------------------------------------------------|
+| `-algorithm` | `UFPMax`, `UGenMax`, `TODISMAX`, or `APFIMAX`                  |
+| `-input`     | Path to uncertain transaction database file                    |
+| `-output`    | Path to write results                                          |
+| `-minsup`    | Support threshold (double for UFPMax/UGenMax, int for TODIS/APFI) |
+| `-minprob`   | Probability threshold for TODISMAX/APFIMAX (e.g., 0.5, 0.9)   |
+| `-topk`      | Top-K mode for UFPMax/UGenMax only                             |
+
+## Input Format
+
+Each line is one transaction. Items followed by probability in parentheses:
+
 ```
 1(0.8) 3(0.6) 4(0.9)
 2(0.7) 3(0.5) 5(0.9)
 1(0.6) 2(0.8) 3(0.7) 5(0.85)
-2(0.5) 5(0.6)
-1(0.9) 2(0.75) 3(0.8) 5(0.7)
 ```
 
-**Standard (deterministic) transactions** — items without probabilities are
-treated as having probability 1.0:
-```
-1 3 4
-2 3 5
-1 2 3 5
-```
+Items without parentheses are treated as probability 1.0.
 
----
-
-## Output File Format
-
-SPMF-compatible format. Each line is one maximal frequent itemset:
+## Output Format
 
 ```
-item1 item2 ... itemN #SUP: expectedSupport
+item1 item2 ... #SUP: expectedSupport     (UFPMax/UGenMax)
+item1 item2 ... #PROB: probability         (TODISMAX/APFIMAX)
 ```
 
-Example:
-```
-1 2 3 5 #SUP: 1.6200
-1 3 4 #SUP: 1.6020
-```
+## Algorithms Overview
 
----
-
-## Algorithms
-
-Both algorithms find the same set of maximal frequent itemsets for a given
-minsup threshold. They differ in enumeration strategy and data structures.
-
-### UGenMax — GenMax for Uncertain Data
-
-Based on **GenMax** (Gouda & Zaki, 2005). Bottom-up enumeration using weighted
-tidset intersections.
-
-**Key characteristics:**
-- **Data structure:** Weighted tidsets — each item maps to a list of
-  `(transactionId, probability)` pairs
-- **Enumeration:** Depth-first backtracking through the itemset lattice.
-  Items sorted by expected support ascending (least frequent first).
-  Candidates processed most-frequent-first for earlier discovery of large MFIs.
-- **Expected support:** Computed via tidset intersection — intersecting two
-  weighted tidsets multiplies per-transaction probabilities and sums the products.
-- **Top-K mode:** Dynamic threshold raising — as new MFIs enter the Top-K heap,
-  minsup increases during search, strengthening anti-monotone pruning.
-
-### UFPMax — FPMax for Uncertain Data
-
-Based on **FPMax** (Grahne & Zhu, 2003). Top-down enumeration using conditional
-database projection.
-
-**Key characteristics:**
-- **Data structure:** Projected transactions — each carries a weight
-  (accumulated probability product of conditioning items) plus remaining items
-  with their per-transaction probabilities.
-- **Enumeration:** Recursive conditional database construction. Items sorted by
-  expected support descending (FP-tree ordering). Items processed from least to
-  most frequent in each recursive call.
-- **Expected support:** Computed by summing `weight * P(item, t)` across all
-  projected transactions containing the item.
-- **Top-K mode:** Fixed threshold during search, Top-K selection after search
-  completes. FPMax's processing order (least frequent first) discovers
-  single-item MFIs early, which would raise the threshold prematurely if
-  dynamic raising were used.
-
-### Shared Pruning Strategies
-
-Both algorithms use three pruning rules:
-
-1. **Anti-monotonicity:** If `expSup(prefix U {item}) < minsup`, prune the
-   subtree. Adding items can only decrease expected support since each
-   probability is in (0, 1].
-
-2. **Progressive Focusing:** If `prefix U {all remaining candidates}` is a
-   subset of a known MFI, prune the subtree — no new maximal itemset can be
-   discovered.
-
-3. **Top-K Threshold Raising:** In Top-K mode, the K-th best expected support
-   in the heap serves as a dynamic minsup. As better MFIs are found, minsup
-   increases, strengthening pruning rule 1. (UGenMax applies this during
-   search; UFPMax applies it post-search.)
-
-### Top-K Threshold Seeding
-
-Both algorithms seed the Top-K heap with single-item and 2-item expected
-supports before the main search. This establishes a reasonable initial minsup
-(set to 50% of the seeded threshold) so the search space is tractable from the
-start. The heap is then reset before the main search begins.
-
-If fewer than K results are found, the algorithm retries with progressively
-lower thresholds (25% of previous).
-
----
-
-## Example Results
-
-### contextUncertain.txt (5 transactions, 5 items) with minsup = 1.0
-
-Both algorithms produce the same 4 maximal frequent itemsets:
-
-```
-{1, 3, 4} (expSup=1.6020)
-{2, 5}    (expSup=1.8575)
-{1, 2, 3, 5} (expSup=1.6200)
-{2, 3, 5}    (expSup=1.7390)
-```
-
----
+| Algorithm | Support Model | Strategy | Speed |
+|-----------|--------------|----------|-------|
+| UGenMax   | Expected support | Bottom-up tidset intersection | Fastest for expected support |
+| UFPMax    | Expected support | Top-down conditional projection | Slightly slower |
+| TODIS-MAX | Probabilistic | Exact DP (O(nT) per candidate) | Slower but exact |
+| APFI-MAX  | Probabilistic | CLT approximation (O(n) per candidate) | 3-8x faster than TODIS-MAX |
 
 ## Authors
 
-- **Mã Quốc Cường**
-- **Nguyễn Cao Phi**
+- **Ma Quoc Cuong** (522I0001)
+- **Nguyen Cao Phi** (521V0006)
+
+Advised by **Prof. Nguyen Chi Thien**, Ton Duc Thang University
