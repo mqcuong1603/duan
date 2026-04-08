@@ -1,0 +1,780 @@
+\documentclass[12pt,a4paper]{report}
+
+% ============================================================
+% PACKAGES
+% ============================================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{vietnam}
+\usepackage[T5]{fontenc}
+\usepackage[vietnamese,english]{babel}
+\usepackage{times}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{xcolor}
+
+% ============================================================
+% FORMATTING
+% ============================================================
+\onehalfspacing
+
+% Chapter formatting: "CHAPTER 1" then title
+\titleformat{\chapter}[display]
+  {\normalfont\Large\bfseries\centering}
+  {CHAPTER \thechapter}{0pt}{\Large\uppercase}
+\titlespacing*{\chapter}{0pt}{-20pt}{20pt}
+
+% Section/subsection formatting
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}{\normalfont\normalsize\bfseries\itshape}{\thesubsubsection}{1em}{}
+
+% Page numbering
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[R]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+
+% TOC formatting
+\renewcommand{\cftchapfont}{\bfseries}
+\renewcommand{\cftsecfont}{}
+\renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}}
+
+% Hyperref setup
+\hypersetup{colorlinks=true, linkcolor=black, citecolor=black, urlcolor=blue}
+
+% Listings for pseudocode
+\lstset{
+  basicstyle=\small\ttfamily,
+  frame=single,
+  xleftmargin=1em,
+  breaklines=true,
+  numbers=left,
+  numberstyle=\tiny,
+  numbersep=5pt,
+}
+
+% Theorem environments
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{definition}{Definition}[chapter]
+
+% ============================================================
+% DOCUMENT
+% ============================================================
+\begin{document}
+
+% ============================================================
+% TITLE PAGE 1 (without advisor)
+% ============================================================
+\thispagestyle{fancy}
+\begin{titlepage}
+\begin{center}
+
+VIETNAM GENERAL CONFEDERATION OF LABOUR\\
+\textbf{TON DUC THANG UNIVERSITY}\\
+\textbf{FACULTY OF INFORMATION TECHNOLOGY}\\
+
+\vspace{1cm}
+\includegraphics[width=4.2cm]{tdtu_logo.png}
+
+\vspace{2cm}
+\textbf{MÃ QUỐC CƯỜNG -- 522I0001}\\
+\textbf{NGUYỄN CAO PHI -- 521V0006}\\
+
+\vspace{2cm}
+{\LARGE\textbf{A Comparative Analysis of FPMax and GenMax for Mining Frequent Maximal Itemsets from Uncertain Transaction Databases}}
+
+\vspace{3cm}
+{\large\textbf{Information Technology Project -- 504091}}
+
+\vfill
+\textbf{HO CHI MINH CITY, YEAR 2026}
+
+\end{center}
+\end{titlepage}
+
+% ============================================================
+% TITLE PAGE 2 (with advisor)
+% ============================================================
+\thispagestyle{fancy}
+\begin{titlepage}
+\begin{center}
+
+VIETNAM GENERAL CONFEDERATION OF LABOUR\\
+\textbf{TON DUC THANG UNIVERSITY}\\
+\textbf{FACULTY OF INFORMATION TECHNOLOGY}\\888
+
+\vspace{1cm}
+\includegraphics[width=4.2cm]{tdtu_logo.png}
+
+\vspace{2cm}
+\textbf{MÃ QUỐC CƯỜNG -- 522I0001}\\
+\textbf{NGUYỄN CAO PHI -- 521V0006}\\
+
+\vspace{2cm}
+{\LARGE\textbf{A Comparative Analysis of FPMax and GenMax for Mining Frequent Maximal Itemsets from Uncertain Transaction Databases}}
+
+\vspace{1.5cm}
+{\large\textbf{Information Technology Project -- 504091}}
+
+\vspace{2cm}
+Advised by\\
+\textbf{Prof. Nguyễn Chí Thiện}
+
+\vfill
+\textbf{HO CHI MINH CITY, YEAR 2026}
+
+\end{center}
+\end{titlepage}
+
+% ============================================================
+% ACKNOWLEDGMENT
+% ============================================================
+\chapter*{ACKNOWLEDGMENT}
+\addcontentsline{toc}{chapter}{ACKNOWLEDGMENT}
+
+We would like to express our sincere gratitude to Professor Nguyễn Chí Thiện for his patient guidance, thoughtful supervision, and continuous encouragement throughout this project. His expertise in data mining and algorithm design provided invaluable direction at every stage of our work.
+
+We also thank our classmates for their helpful discussions and feedback, and Ton Duc Thang University for providing the academic environment and resources that made this project possible.
+
+\vspace{3cm}
+\begin{flushright}
+\textit{Ho Chi Minh City, day \quad month \quad year 2026}\\
+\textit{Authors}\\[2cm]
+\textit{(Signature and full name)}
+\end{flushright}
+
+% ============================================================
+% DECLARATION OF AUTHORSHIP
+% ============================================================
+\chapter*{DECLARATION OF AUTHORSHIP}
+\addcontentsline{toc}{chapter}{DECLARATION OF AUTHORSHIP}
+
+I hereby declare that this thesis was carried out by my team under the guidance and supervision of Prof Nguyễn Chí Thiện; and that the work and the results contained in it are original and have not been submitted anywhere for any previous purposes. The data and figures presented in this thesis are for analysis, comments, and evaluations from various resources by my own work and have been duly acknowledged in the reference part.
+
+In addition, other comments, reviews and data used by other authors, and organizations have been acknowledged, and explicitly cited.
+
+\textbf{I will take full responsibility for any fraud detected in my thesis}. Ton Duc Thang University is unrelated to any copyright infringement caused on my work (if any).
+
+\vspace{2cm}
+\begin{flushright}
+\textit{Ho Chi Minh City, day \quad month \quad year}\\
+\textit{Author}\\[2cm]
+\textit{[Signature and full name]}
+\end{flushright}
+
+% ============================================================
+% ABSTRACT
+% ============================================================
+\chapter*{ABSTRACT}
+% \addcontentsline{toc}{chapter}{ABSTRACT}
+
+% {\centering\large\textbf{A Comparative Analysis of FPMax and GenMax for Mining Frequent Maximal Itemsets from Uncertain Transaction Databases}\par}
+
+% \vspace{0.5cm}
+
+% Frequent itemset mining is a fundamental task in data mining. Classical algorithms assume binary transaction data where items are either present or absent. However, real-world databases often contain \textbf{uncertainty}: a barcode scanner might be only 80\% confident that it read a product correctly, a sensor might report a reading with known error margins, or data merged from multiple sources might contain conflicting entries. In such databases, each item is associated with an \textbf{existential probability} rather than a simple yes/no flag.
+
+% This report addresses the problem of mining \textbf{frequent maximal itemsets} from uncertain transaction databases. A maximal frequent itemset is a group of items whose expected co-occurrence meets a minimum threshold and cannot be extended by adding any more item without dropping below that threshold.
+
+% We present two algorithms:
+
+% \textbf{UGenMax} adapts the GenMax algorithm (Gouda and Zaki, 2005). It works bottom-up, using weighted tidsets to track which transactions contain each item and with what probability. It computes expected support by intersecting these tidsets.
+
+% \textbf{UFPMax} adapts the FPMax algorithm (Grahne and Zhu, 2003). It works top-down, progressively building smaller conditional databases by projecting transactions onto subsets of items, with each projection carrying forward the accumulated probability.
+
+% Both algorithms employ a branch-and-bound search with three pruning techniques: (1) anti-monotonicity pruning, (2) progressive focusing, and (3) dynamic Top-K threshold raising. We implement both in pure Java SE with no external dependencies. Experiments on benchmark datasets confirm that both algorithms produce identical results and exhibit complementary performance characteristics.
+
+\pagebreak
+
+% ============================================================
+% TABLE OF CONTENTS
+% ============================================================
+\tableofcontents
+\addcontentsline{toc}{chapter}{TABLE OF CONTENTS}
+
+% ============================================================
+% LIST OF FIGURES (placeholder)
+% ============================================================
+\listoffigures
+\addcontentsline{toc}{chapter}{IMAGE TABLE}
+
+% ============================================================
+% LIST OF ABBREVIATIONS
+% ============================================================
+\chapter*{List of Abbreviations}
+\addcontentsline{toc}{chapter}{List of Abbreviations}
+
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Abbreviation} & \textbf{Definition} \\
+\midrule
+FIM & Frequent Itemset Mining \\
+MFI & Maximal Frequent Itemset \\
+DFS & Depth-First Search \\
+expSup & Expected Support \\
+minsup & Minimum Expected Support Threshold \\
+WT & Weighted Tidset \\
+DB & Database \\
+\bottomrule
+\end{tabular}
+
+% ============================================================
+% CHAPTER 1: INTRODUCTION
+% ============================================================
+\chapter{INTRODUCTION}
+
+\section{What is Frequent Itemset Mining?}
+
+Imagine a supermarket analyzing thousands of customer receipts to discover which products are frequently bought together. If many customers buy bread and butter in the same trip, the pair \{bread, butter\} is a \textbf{frequent itemset}. This information is valuable for product placement, cross-selling, and inventory management.
+
+More formally, given a database of transactions (where each transaction is a set of items) and a minimum support threshold, the goal of frequent itemset mining is to find all item groups that appear in at least that many transactions. This problem was first formalized by Agrawal, Imielinski, and Swami~\cite{agrawal1993} and has since become one of the most studied problems in data mining, with applications in bioinformatics, text mining, web usage analysis, network security, and recommendation systems.
+
+\section{The Challenge of Uncertainty}
+
+Classical algorithms assume perfect data: an item is either in a transaction or it is not. In practice, data is often imperfect. Consider these real-world scenarios:
+
+\begin{itemize}
+  \item \textbf{Sensor networks.} A temperature sensor reports values with a known error margin. When the system logs that a sensor detected item A, it might only be 85\% confident in that reading.
+  \item \textbf{Data integration.} When merging customer records from two different databases, some matches are ambiguous. A merged record might indicate that a customer purchased item B, but with only 70\% confidence due to name/address mismatches.
+  \item \textbf{Privacy preservation.} To protect user privacy, a system deliberately adds random noise to transaction data. Each item's presence is now probabilistic rather than certain.
+\end{itemize}
+
+In all these cases, the result is an \textbf{uncertain transaction database} where each item in each transaction carries a probability between 0 and 1. The challenge is: how do we mine meaningful patterns from data that we are not entirely sure about?
+
+\section{Why Maximal Itemsets?}
+
+A database with $m$ distinct items has $2^m$ possible subsets. Even a modest database with 100 items has more possible subsets than atoms in the universe. While most of these are not frequent, the number of frequent itemsets can still be enormous---potentially millions or more.
+
+\textbf{Maximal frequent itemsets} solve this information overload problem. A frequent itemset is maximal if no proper superset of it is also frequent. The key insight is that every frequent itemset is a subset of at least one maximal frequent itemset, so the maximal set is a \textbf{lossless compression} of the full set of frequent itemsets.
+
+\section{Project Objectives}
+
+This project has four objectives:
+
+\begin{enumerate}
+  \item Formally define the problem of mining frequent maximal itemsets from uncertain databases using the expected support model, with precise mathematical definitions for each concept.
+  \item Design and implement two algorithms (UGenMax and UFPMax) that solve this problem using branch-and-bound strategies.
+  \item Implement both algorithms as a pure Java SE command-line application with no external library dependencies.
+  \item Experimentally evaluate and compare both algorithms on benchmark datasets of varying sizes and uncertainty levels.
+\end{enumerate}
+
+\section{Report Structure}
+
+The remainder of this report is organized as follows. Chapter~2 reviews related work. Chapter~3 provides formal problem definitions. Chapter~4 presents the two algorithms in detail, including pseudocode, worked examples, and complexity analysis. Chapter~5 describes the experimental setup. Chapter~6 presents results. Chapter~7 concludes with a summary and future work.
+
+% ============================================================
+% CHAPTER 2: LITERATURE REVIEW
+% ============================================================
+\chapter{LITERATURE REVIEW}
+
+% \section{Frequent Itemset Mining in Deterministic Databases}
+
+% The Apriori algorithm~\cite{agrawal1994} was the first efficient algorithm for frequent itemset mining. Its key contribution was the \textbf{anti-monotonicity property}: if an itemset is infrequent, then all of its supersets are also infrequent. The FP-Growth algorithm~\cite{han2000} improved upon Apriori by eliminating candidate generation through a compressed FP-tree data structure.
+
+% \section{Mining Maximal Frequent Itemsets}
+
+% Several algorithms have been developed specifically for maximal frequent itemset mining:
+
+% \begin{itemize}
+%   \item \textbf{MaxMiner}~\cite{bayardo1998} was the first to use a look-ahead pruning strategy.
+%   \item \textbf{GenMax}~\cite{gouda2005} introduced depth-first backtracking with tidsets and progressive focusing. Our UGenMax adapts this algorithm.
+%   \item \textbf{FPMax}~\cite{grahne2003} extended FP-Growth with MFI-tree superset checking. Our UFPMax adapts this algorithm.
+%   \item \textbf{CARPENTER-MAX}~\cite{pan2003} was designed for datasets with many items but few transactions.
+%   \item \textbf{Charm-MFI}~\cite{szathmary2006} discovers maximal itemsets by post-processing closed itemsets.
+% \end{itemize}
+
+% \section{Uncertain Database Mining}
+
+% Chui, Kao, and Hung~\cite{chui2007} pioneered uncertain data mining with the expected support model and U-Apriori algorithm. Leung et al.~\cite{leung2008} proposed UF-Growth for uncertain data. Leung and Tanbeer~\cite{leung2013} improved this with UFP-Growth. Li and Zhang~\cite{li2019} addressed the top-k variant with dynamic threshold raising. Aggarwal et al.~\cite{aggarwal2009} analyzed the theoretical complexity of uncertain pattern mining.
+
+% \section{Gap and Our Contribution}
+
+% Most prior work on uncertain data mining focuses on mining \textbf{all} frequent itemsets or \textbf{closed} frequent itemsets. Mining \textbf{maximal} frequent itemsets from uncertain databases has received less attention. Our contribution fills this gap by adapting two complementary strategies (GenMax's bottom-up tidset approach and FPMax's top-down projection approach) for uncertain data, with both static minsup and dynamic Top-K mode support.
+
+% ============================================================
+% CHAPTER 3: PROBLEM STATEMENT AND DEFINITIONS
+% ============================================================
+\chapter{PROBLEM STATEMENT AND RELATED DEFINITIONS}
+
+This section provides precise mathematical definitions for each concept. We build the definitions incrementally, starting from the data model and working up to the problem statement.
+
+\section{Uncertain Transaction Database}
+
+\begin{definition}[Item Set]
+Let $I = \{i_1, i_2, \ldots, i_m\}$ be a finite set of $m$ distinct items.
+\end{definition}
+
+\begin{definition}[Uncertain Transaction]
+An uncertain transaction $t_k$ is a set of items from $I$, where each item $i$ is associated with an \textbf{existential probability} $P(i, t_k)$ satisfying:
+\[ 0 < P(i, t_k) \leq 1 \]
+Items are assumed to be mutually independent within each transaction.
+\end{definition}
+
+\begin{definition}[Uncertain Transaction Database]
+An uncertain transaction database $D = \{t_1, t_2, \ldots, t_n\}$ is an ordered collection of $n$ uncertain transactions.
+\end{definition}
+
+\textbf{Running Example.} Throughout this report, we use the following 5-transaction database for illustration:
+
+\begin{table}[h]
+\centering
+\caption{The contextUncertain dataset}
+\label{tab:running_example}
+\begin{tabular}{cl}
+\toprule
+\textbf{Transaction} & \textbf{Items (with existential probabilities)} \\
+\midrule
+$t_1$ & 1(0.8) \quad 3(0.6) \quad 4(0.9) \\
+$t_2$ & 2(0.7) \quad 3(0.5) \quad 5(0.9) \\
+$t_3$ & 1(0.6) \quad 2(0.8) \quad 3(0.7) \quad 5(0.85) \\
+$t_4$ & 2(0.5) \quad 5(0.6) \\
+$t_5$ & 1(0.9) \quad 2(0.75) \quad 3(0.8) \quad 5(0.7) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Expected Support}
+
+\begin{definition}[Expected Support]
+The expected support of an itemset $X = \{x_1, x_2, \ldots, x_p\}$ in database $D$ is:
+\begin{equation}
+\text{expSup}(X) = \sum_{t \in D} \prod_{x \in X} P(x, t)
+\label{eq:expsup}
+\end{equation}
+\end{definition}
+
+\textbf{Worked Example.} Consider $X = \{1, 3\}$:
+
+\begin{align*}
+t_1&: P(1,t_1) \times P(3,t_1) = 0.8 \times 0.6 = 0.48 \\
+t_2&: \text{item 1 absent} = 0.00 \\
+t_3&: P(1,t_3) \times P(3,t_3) = 0.6 \times 0.7 = 0.42 \\
+t_4&: \text{item 1 absent} = 0.00 \\
+t_5&: P(1,t_5) \times P(3,t_5) = 0.9 \times 0.8 = 0.72 \\
+\end{align*}
+\[ \text{expSup}(\{1, 3\}) = 0.48 + 0.00 + 0.42 + 0.00 + 0.72 = \mathbf{1.62} \]
+
+\section{Anti-Monotonicity Property}
+
+\begin{theorem}[Anti-Monotonicity of Expected Support]
+For any itemset $X$ and any item $y \notin X$:
+\[ \text{expSup}(X \cup \{y\}) \leq \text{expSup}(X) \]
+\end{theorem}
+
+\begin{proof}
+Since $0 < P(y, t) \leq 1$ for all transactions $t$, each term $\prod_{x \in X} P(x,t) \cdot P(y,t) \leq \prod_{x \in X} P(x,t)$. Therefore the sum cannot increase.
+\end{proof}
+
+\section{Frequent and Maximal Frequent Itemsets}
+
+\begin{definition}[Frequent Itemset]
+Given threshold minsup, itemset $X$ is \textbf{frequent} if $\text{expSup}(X) \geq \text{minsup}$.
+\end{definition}
+
+\begin{definition}[Maximal Frequent Itemset]
+A frequent itemset $X$ is \textbf{maximal} if for every item $y \notin X$, $\text{expSup}(X \cup \{y\}) < \text{minsup}$.
+\end{definition}
+
+\section{Problem Statement}
+
+\textbf{Input:} An uncertain transaction database $D$ and either (a) a minimum expected support threshold $\text{minsup} > 0$, or (b) a positive integer $K$.
+
+\textbf{Output:} The set $\text{MFI}(D, \text{minsup})$ of all maximal frequent itemsets with their expected support values. In Top-K mode, the $K$ MFIs with highest expected support.
+
+% ============================================================
+% CHAPTER 4: METHODS
+% ============================================================
+\chapter{METHODS}
+
+This chapter presents both algorithms in detail: data structures, pseudocode, worked examples, and complexity analysis.
+
+\section{Branch-and-Bound Framework}
+
+Both algorithms explore the \textbf{itemset lattice} using depth-first search (DFS). The search is a tree: the root is the empty set, each node is an itemset (prefix), and each edge adds one item. Without pruning, this requires exploring $2^m$ subsets. Branch-and-bound makes the search tractable by computing \textbf{bounds} at each node and \textbf{pruning} subtrees that cannot yield useful results.
+
+\subsection{Pruning 1: Anti-Monotonicity Bound}
+
+\textbf{Rule:} If $\text{expSup}(\text{prefix} \cup \{\text{item}\}) < \text{minsup}$, skip this item and the entire subtree below it.
+
+\textbf{Rationale:} By Theorem~3.1, every superset will have even lower expected support. This rule is responsible for the majority of pruning in practice. For UGenMax, a cheaper upper bound $\min(\text{expSup}(A), \text{expSup}(B))$ is checked before the full intersection.
+
+\subsection{Pruning 2: Progressive Focusing}
+
+\textbf{Rule:} Let $P$ be the current prefix and $C$ the remaining candidates. If $P \cup C \subseteq M$ for some known MFI $M$, prune the entire subtree.
+
+\textbf{Rationale:} Any discoverable itemset would be a subset of $M$ and therefore not maximal. This rule becomes increasingly effective as more MFIs are discovered during the search.
+
+\subsection{Pruning 3: Top-K Dynamic Threshold Raising}
+
+In Top-K mode, a \textbf{min-heap} of size $K$ tracks the best results. When a new MFI is discovered, if the heap is full and the new MFI's expected support exceeds the heap minimum, the minimum is replaced. The new heap minimum becomes the updated minsup.
+
+\textbf{Feedback loop:} Better results $\rightarrow$ higher threshold $\rightarrow$ more aggressive pruning $\rightarrow$ faster convergence.
+
+\textbf{Design difference:} UGenMax raises the threshold dynamically during search. UFPMax does \textbf{not}, because its processing order discovers single-item MFIs early, which would prematurely block multi-item MFIs.
+
+\section{Algorithm 1: UGenMax}
+
+UGenMax adapts GenMax~\cite{gouda2005} for uncertain data using \textbf{bottom-up, depth-first backtracking} with \textbf{weighted tidsets}.
+
+\subsection{Data Structure: Weighted Tidsets}
+
+\begin{definition}[Weighted Tidset]
+The weighted tidset of item $i$ is:
+\[ \text{WT}(i) = \{(t, P(i,t)) \mid t \in D,\ P(i,t) > 0\} \]
+sorted by transaction ID. Expected support: $\text{expSup}(i) = \sum_{(t,p) \in \text{WT}(i)} p$.
+\end{definition}
+
+To compute $\text{expSup}(\{A, B\})$, we \textbf{intersect} $\text{WT}(A)$ and $\text{WT}(B)$ using a merge-join in $O(|\text{WT}(A)| + |\text{WT}(B)|)$ time. For each common transaction $t$, the result is $(t, P(A,t) \times P(B,t))$.
+
+\textbf{Worked Example.} Using items 1 and 3 from Table~\ref{tab:running_example}:
+
+\begin{align*}
+\text{WT}(1) &= [(t_1, 0.8),\ (t_3, 0.6),\ (t_5, 0.9)] \quad \text{expSup} = 2.3 \\
+\text{WT}(3) &= [(t_1, 0.6),\ (t_2, 0.5),\ (t_3, 0.7),\ (t_5, 0.8)] \quad \text{expSup} = 2.6
+\end{align*}
+
+Intersection:
+\begin{align*}
+t_1&: \text{both present} \rightarrow 0.8 \times 0.6 = 0.48 \\
+t_2&: \text{only in WT}(3) \rightarrow \text{skip} \\
+t_3&: \text{both present} \rightarrow 0.6 \times 0.7 = 0.42 \\
+t_5&: \text{both present} \rightarrow 0.9 \times 0.8 = 0.72
+\end{align*}
+\[ \text{WT}(\{1,3\}) = [(t_1, 0.48),\ (t_3, 0.42),\ (t_5, 0.72)] \quad \text{expSup} = 1.62 \]
+
+\subsection{Enumeration Strategy}
+
+Items are sorted by expected support \textbf{ascending}. Candidates are processed \textbf{most frequent first} (right to left). This ordering discovers large MFIs early, strengthening progressive focusing.
+
+\subsection{Pseudocode}
+
+\begin{algorithm}[H]
+\caption{UGenMax}
+\begin{algorithmic}[1]
+\Require Uncertain database $D$, threshold minsup
+\Ensure Set $\text{MFI}$ of all maximal frequent itemsets
+\State $\text{MFI} \gets \emptyset$
+\For{each item $i$ in $D$}
+  \State Build $\text{WT}(i)$ by scanning all transactions
+\EndFor
+\State Remove items where $\text{expSup}(i) < \text{minsup}$
+\State Sort items by expSup ascending: $[i_1, i_2, \ldots, i_k]$
+\State \Call{GenMax}{$\emptyset$, $[i_1, \ldots, i_k]$, null}
+\State \Return MFI
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{GenMax Procedure}
+\begin{algorithmic}[1]
+\Procedure{GenMax}{prefix, candidates, prefixTidset}
+  \If{$\text{prefix} \cup \text{candidates} \subseteq$ some MFI in MFI} \Comment{Pruning 2}
+    \State \Return
+  \EndIf
+  \State hasFreqExt $\gets$ false
+  \For{idx $\gets$ $|$candidates$| - 1$ \textbf{downto} 0}
+    \State item $\gets$ candidates[idx]
+    \State newTidset $\gets$ \Call{Intersect}{prefixTidset, WT(item)}
+    \State expSup $\gets$ Sum(newTidset.probabilities)
+    \If{expSup $<$ minsup} \Comment{Pruning 1}
+      \State \textbf{continue}
+    \EndIf
+    \State hasFreqExt $\gets$ true
+    \State newPrefix $\gets$ prefix $\cup$ \{item\}
+    \State newCands $\gets$ \{$c \in$ candidates$[0..idx{-}1]$ $|$ Intersect(newTidset, WT($c$)).expSup $\geq$ minsup\}
+    \If{newCands $= \emptyset$}
+      \State \Call{AddMaximal}{newPrefix, expSup}
+    \Else
+      \State \Call{GenMax}{newPrefix, newCands, newTidset}
+    \EndIf
+  \EndFor
+  \If{\textbf{not} hasFreqExt \textbf{and} prefix $\neq \emptyset$}
+    \State \Call{AddMaximal}{prefix, prefixTidset.expSup}
+  \EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Complexity Analysis}
+
+\textbf{Time:} Worst case $O(2^m)$ nodes, each with $O(n)$ tidset intersection. Pruning dramatically reduces explored nodes in practice.
+
+\textbf{Space:} $O(m \times n)$ for weighted tidsets, $O(|\text{MFI}|)$ for results, $O(m)$ for the recursion stack.
+
+\section{Algorithm 2: UFPMax}
+
+UFPMax adapts FPMax~\cite{grahne2003} for uncertain data using \textbf{top-down, recursive conditional database projection}.
+
+\subsection{Data Structure: Projected Transactions}
+
+Each projected transaction is a triple (weight, items[], probs[]):
+\begin{itemize}
+  \item \textbf{weight}: accumulated product of probabilities of all prefix items. Initially 1.0.
+  \item \textbf{items[] and probs[]}: remaining items and probabilities, sorted by frequency-descending order.
+\end{itemize}
+
+Expected support of item $i$ in a conditional database:
+\begin{equation}
+\text{expSup}(i \mid \text{prefix}) = \sum_{t : i \in t} \text{weight}_t \times P(i, t)
+\end{equation}
+
+\subsection{Conditional Database Construction}
+
+When extending prefix by item $i$:
+\begin{enumerate}
+  \item Select transactions containing item $i$.
+  \item Compute $\text{new\_weight} = \text{old\_weight} \times P(i, t)$.
+  \item Project to items \textbf{before} $i$ in header order (more frequent items).
+  \item Remove items with conditional expSup $<$ minsup.
+\end{enumerate}
+
+\subsection{Pseudocode}
+
+\begin{algorithm}[H]
+\caption{UFPMax}
+\begin{algorithmic}[1]
+\Require Uncertain database $D$, threshold minsup
+\Ensure Set $\text{MFI}$ of all maximal frequent itemsets
+\State $\text{MFI} \gets \emptyset$
+\State Compute expSup for each single item
+\State Remove items with expSup $<$ minsup
+\State Sort items by expSup descending: header $= [h_1, \ldots, h_k]$
+\State Build initial projected DB (weight = 1.0, frequent items only)
+\State \Call{FPMax}{$\emptyset$, 0.0, projDB, header}
+\State \Return MFI
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{FPMax Procedure}
+\begin{algorithmic}[1]
+\Procedure{FPMax}{prefix, prefixExpSup, condDB, headerItems}
+  \If{prefix $\cup$ headerItems $\subseteq$ some MFI} \Comment{Pruning 2}
+    \State \Return
+  \EndIf
+  \State hasFreqExt $\gets$ false
+  \For{idx $\gets$ $|$headerItems$| - 1$ \textbf{downto} 0}
+    \State item $\gets$ headerItems[idx]
+    \State expSup $\gets \sum_{t \in \text{condDB}}$ weight$_t \times P$(item, $t$)
+    \If{expSup $<$ minsup} \Comment{Pruning 1}
+      \State \textbf{continue}
+    \EndIf
+    \State hasFreqExt $\gets$ true; newPrefix $\gets$ prefix $\cup$ \{item\}
+    \State newCondDB $\gets$ \Call{BuildConditional}{condDB, item, idx}
+    \State newHeader $\gets$ \{$h \in$ header$[0..idx{-}1]$ $|$ condExpSup$(h) \geq$ minsup\}
+    \If{newHeader $= \emptyset$}
+      \State \Call{AddMaximal}{newPrefix, expSup}
+    \Else
+      \State \Call{FPMax}{newPrefix, expSup, newCondDB, newHeader}
+    \EndIf
+  \EndFor
+  \If{\textbf{not} hasFreqExt \textbf{and} prefix $\neq \emptyset$}
+    \State \Call{AddMaximal}{prefix, prefixExpSup}
+  \EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Complexity Analysis}
+
+\textbf{Time:} Worst case $O(2^m)$ nodes. Conditional DB construction is $O(|\text{condDB}| \times |\text{items}|)$ per node, shrinking at deeper levels.
+
+\textbf{Space:} $O(n \times m)$ for the initial projected DB. Each recursive level maintains its own conditional DB. Stack depth at most $m$.
+
+\section{Comparison of UGenMax and UFPMax}
+
+\begin{table}[h]
+\centering
+\caption{Comparison of UGenMax and UFPMax}
+\begin{tabularx}{\textwidth}{lXX}
+\toprule
+\textbf{Aspect} & \textbf{UGenMax} & \textbf{UFPMax} \\
+\midrule
+Base algorithm & GenMax (Gouda \& Zaki, 2005) & FPMax (Grahne \& Zhu, 2003) \\
+Approach & Bottom-up (vertical) & Top-down (horizontal) \\
+Data structure & Weighted tidsets & Projected conditional DBs \\
+Item ordering & Ascending expSup & Descending expSup \\
+Top-K threshold & Raised dynamically & Fixed, select after search \\
+Best for & Sparse data & Dense data \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Top-K Seeding}
+
+Both algorithms use a seeding phase in Top-K mode: (1) take the top-50 most frequent items, (2) generate all single and 2-item combinations, (3) fill a Top-K heap, (4) set initial minsup to 50\% of the heap minimum, (5) reset the heap and begin the main search. If fewer than $K$ results are found, retry with 25\% of current threshold, up to 3 retries.
+
+\section{Maximality Checking}
+
+When a leaf node is reached, the candidate MFI is checked: (1) it must not be a subset of any existing MFI, and (2) existing MFIs that are subsets of the new candidate are removed. Both checks use sorted arrays for $O(|A| + |B|)$ merge-based comparison.
+
+% ============================================================
+% CHAPTER 5: EXPERIMENT DESIGN
+% ============================================================
+\chapter{EXPERIMENT DESIGN}
+
+\section{Implementation Details}
+
+Both algorithms are implemented in Java SE 25 with no external dependencies. The code is organized into packages: \texttt{algorithm/} (UGenMax, UFPMax, WeightedTidset), \texttt{model/} (UncertainDatabase, UncertainTransaction, Itemset, TopKHeap), \texttt{util/} (PerformanceTracker). Every class includes Javadoc documentation.
+
+\section{Datasets}
+
+\begin{table}[h]
+\centering
+\caption{Experimental datasets}
+\begin{tabular}{lccll}
+\toprule
+\textbf{Dataset} & \textbf{Trans.} & \textbf{Items} & \textbf{Prob. Distribution} & \textbf{Purpose} \\
+\midrule
+contextUncertain & 5 & 5 & Manual & Hand verification \\
+mushroom\_high & 8,416 & 120 & $N(\mu{=}0.8, \sigma{=}0.1)$ & Low uncertainty \\
+mushroom\_medium & 8,416 & 120 & $N(\mu{=}0.5, \sigma{=}0.2)$ & Moderate uncertainty \\
+mushroom\_low & 8,416 & 120 & $N(\mu{=}0.3, \sigma{=}0.15)$ & High uncertainty \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The mushroom dataset is from the UCI Machine Learning Repository. Uncertain variants are generated using the \texttt{DatasetConverter} utility with clamped normal distributions, following methodology from~\cite{chui2007} and~\cite{leung2008}.
+
+\section{Configurations}
+
+\textbf{Static minsup mode:} Vary minsup across appropriate ranges for each dataset.
+
+\textbf{Top-K mode:} $K \in \{5, 10, 20, 50\}$.
+
+For each configuration we record: time (ms), memory (MB), nodes explored, pruning counts, and number of MFIs.
+
+\section{Correctness Validation}
+
+Cross-algorithm agreement (UGenMax and UFPMax produce identical MFI sets) and hand verification on contextUncertain.
+
+\section{Performance Measurement}
+
+PerformanceTracker uses \texttt{System.nanoTime()} for timing and \texttt{Runtime.totalMemory() - Runtime.freeMemory()} for memory, with GC forced before each run.
+
+% ============================================================
+% CHAPTER 6: EXPERIMENT RESULTS
+% ============================================================
+% \chapter{EXPERIMENT RESULTS}
+
+% \section{Correctness Verification}
+
+% On contextUncertain, both algorithms produce identical results for all minsup values tested. On all mushroom variants, UGenMax and UFPMax produce the same MFI sets, confirming correctness.
+
+% \section{Performance Comparison}
+
+% \subsection{Effect of Minimum Support Threshold}
+
+% [Insert experimental data tables and charts here.]
+
+% \subsection{Effect of Uncertainty Level}
+
+% [Insert comparative results across high/medium/low uncertainty.]
+
+% \subsection{Pruning Effectiveness}
+
+% [Insert pruning breakdown data for each algorithm.]
+
+% \section{Top-K Mode}
+
+% [Insert Top-K results for $K = 5, 10, 20, 50$.]
+
+% \section{Summary of Findings}
+
+% \begin{enumerate}
+%   \item \textbf{Correctness:} Both algorithms produce identical results for all configurations.
+%   \item \textbf{Complementary performance:} UGenMax is better on sparse data; UFPMax is better on dense data.
+%   \item \textbf{Uncertainty impact:} Higher uncertainty requires lower thresholds and increases computation time.
+%   \item \textbf{Top-K effectiveness:} Seeding successfully establishes reasonable initial thresholds.
+% \end{enumerate}
+
+% ============================================================
+% CHAPTER 7: CONCLUSIONS
+% ============================================================
+% \chapter{CONCLUSIONS}
+
+% \section{Summary}
+
+% This project designed, implemented, and evaluated two algorithms for mining frequent maximal itemsets from uncertain transaction databases: UGenMax (bottom-up weighted tidset intersections) and UFPMax (top-down conditional database projection). Both share three pruning strategies in a branch-and-bound framework and produce identical, correct results.
+
+% \section{Key Contributions}
+
+% \begin{enumerate}
+%   \item Formalized the problem with precise mathematical definitions and proofs.
+%   \item Adapted GenMax and FPMax for uncertain data with expected support.
+%   \item Clean Java SE implementation with no external dependencies and unified CLI.
+%   \item Experimental comparison revealing complementary performance characteristics.
+% \end{enumerate}
+
+% \section{Limitations}
+
+% Maximality checking uses linear scan ($O(|\text{MFI}|)$ per check). Top-K seeding uses a fixed strategy that may not be optimal for all datasets.
+
+% \section{Future Work}
+
+% Possible extensions include: diffset optimization for UGenMax, parallel search, mining closed/sequential patterns from uncertain data, and evaluation on real-world uncertain datasets from sensor networks.
+
+% ============================================================
+% REFERENCES
+% ============================================================
+\begin{thebibliography}{99}
+
+\bibitem{agrawal1993}
+Agrawal, R., Imielinski, T., and Swami, A. (1993). Mining association rules between sets of items in large databases. \textit{Proc. ACM SIGMOD}, pp.~207--216.
+
+\bibitem{agrawal1994}
+Agrawal, R. and Srikant, R. (1994). Fast algorithms for mining association rules. \textit{Proc. VLDB}, pp.~487--499.
+
+\bibitem{aggarwal2009}
+Aggarwal, C.C., Li, Y., Wang, J., and Wang, J. (2009). Frequent pattern mining with uncertain data. \textit{Proc. ACM SIGKDD}, pp.~29--38.
+
+\bibitem{bayardo1998}
+Bayardo, R.J. (1998). Efficiently mining long patterns from databases. \textit{Proc. ACM SIGMOD}, pp.~85--93.
+
+\bibitem{chui2007}
+Chui, C.K., Kao, B., and Hung, E. (2007). Mining frequent itemsets from uncertain data. \textit{Proc. PAKDD}, pp.~47--58.
+
+\bibitem{fournier2014}
+Fournier-Viger, P., et al. (2014). SPMF: A Java open-source pattern mining library. \textit{JMLR}, 15, pp.~3569--3573.
+
+\bibitem{gouda2005}
+Gouda, K. and Zaki, M.J. (2005). GenMax: An efficient algorithm for mining maximal frequent itemsets. \textit{Data Mining and Knowledge Discovery}, 11(3), pp.~223--242.
+
+\bibitem{grahne2003}
+Grahne, G. and Zhu, J. (2003). Efficiently using prefix-trees in mining frequent itemsets. \textit{Proc. IEEE ICDM Workshop on FIMI}.
+
+\bibitem{han2000}
+Han, J., Pei, J., and Yin, Y. (2000). Mining frequent patterns without candidate generation. \textit{Proc. ACM SIGMOD}, pp.~1--12.
+
+\bibitem{leung2008}
+Leung, C.K.-S., Mateo, M.A.F., and Brajczuk, D.A. (2008). A tree-based approach for frequent pattern mining from uncertain data. \textit{Proc. PAKDD}, pp.~653--661.
+
+\bibitem{leung2013}
+Leung, C.K.-S. and Tanbeer, S.K. (2013). Fast tree-based mining of frequent itemsets from uncertain data. \textit{Proc. DASFAA}, pp.~272--287.
+
+\bibitem{li2019}
+Li, H. and Zhang, N. (2019). Mining top-k frequent itemsets from uncertain databases. \textit{Proc. DSAA}.
+
+\bibitem{pan2003}
+Pan, F., Cong, G., Tung, A.K.H., Yang, J., and Zaki, M.J. (2003). CARPENTER: Finding closed patterns in long biological datasets. \textit{Proc. ACM SIGKDD}, pp.~637--642.
+
+\bibitem{szathmary2006}
+Szathmary, L., Napoli, A., and Valtchev, P. (2006). Towards rare itemset mining. \textit{Proc. IEEE ICTAI}.
+
+\end{thebibliography}
+
+\end{document}
