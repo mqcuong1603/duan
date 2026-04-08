@@ -1,0 +1,24 @@
+bin/
+results/
+*.class
+
+# Large generated data files (can be regenerated with DatasetConverter)
+data/accidents_high.txt
+data/accidents_medium.txt
+data/accidents_low.txt
+data/retail_high.txt
+data/retail_medium.txt
+data/retail_low.txt
+
+# IDE
+.idea/
+*.iml
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
