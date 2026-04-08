@@ -255,7 +255,7 @@ public class UGenMax {
         List<Itemset> seedCandidates = new ArrayList<>();
 
         // Single items
-        for (int item : topItems) {
+        for (int item : topItems) {8
             seedCandidates.add(new Itemset(new int[]{item},
                     itemTidsets.get(item).getExpectedSupport()));
         }
