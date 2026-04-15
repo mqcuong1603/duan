@@ -138,13 +138,27 @@ the *benchmark suite* runs everything and emits CSVs.
 A sanity check is a short smoke test that verifies the build works before
 running anything heavy. UFPMax and UGenMax are two different algorithms that
 must produce the *same* set of maximal itemsets, so running both on the tiny
-bundled dataset and `diff`-ing the outputs quickly confirms correctness:
+bundled dataset and comparing the outputs quickly confirms correctness.
+
+**Linux / macOS:**
 
 ```bash
-java -cp bin Main -algorithm UFPMax  -input data/contextUncertain.txt -output /tmp/a.txt -minsup 1.0
-java -cp bin Main -algorithm UGenMax -input data/contextUncertain.txt -output /tmp/b.txt -minsup 1.0
-diff /tmp/a.txt /tmp/b.txt   # no output = pass
+java -cp bin Main -algorithm UFPMax  -input data/contextUncertain.txt -output out_a.txt -minsup 1.0
+java -cp bin Main -algorithm UGenMax -input data/contextUncertain.txt -output out_b.txt -minsup 1.0
+diff out_a.txt out_b.txt   # no output = pass
 ```
+
+**Windows (PowerShell):**
+
+```powershell
+java -cp bin Main -algorithm UFPMax  -input data/contextUncertain.txt -output out_a.txt -minsup 1.0
+java -cp bin Main -algorithm UGenMax -input data/contextUncertain.txt -output out_b.txt -minsup 1.0
+Compare-Object (Get-Content out_a.txt) (Get-Content out_b.txt)   # no output = pass
+```
+
+> Note: `/tmp/` does not exist on Windows, and PowerShell's `diff` is an alias
+> for `Compare-Object` that compares its *arguments* unless you pipe file
+> contents in with `Get-Content`.
 
 ## Authors
 
