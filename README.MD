@@ -1,4 +1,4 @@
-# Mining Frequent Maximal Itemsets from Uncertain Transaction Databases
+8# Mining Frequent Maximal Itemsets from Uncertain Transaction Databases
 
 Four algorithms for discovering maximal frequent itemsets (MFIs) from uncertain
 transaction databases, covering two support models:
@@ -57,14 +57,8 @@ duan/
 
 ```bash
 mkdir -p bin
-javac -d bin \
-  src/util/*.java \
-  src/model/*.java \
-  src/algorithm/genmax/*.java \
-  src/algorithm/*.java \
-  src/Main.java \
-  src/DatasetConverter.java \
-  src/experiment/*.java
+javac -d bin src/util/*.java src/model/*.java src/algorithm/genmax/*.java src/algorithm/*.java src/Main.java src/DatasetConverter.java src/experiment/*.java
+
 ```
 
 ### 2. Generate uncertain datasets
@@ -130,6 +124,7 @@ java -Xmx4g -cp bin experiment.ExperimentRunner results
 ```
 
 Outputs:
+
 - `results/exp1_expected_support.csv` — UFPMax vs UGenMax across minsup values
 - `results/exp2_probabilistic.csv` — TODISMAX vs APFIMAX across minsup/minprob
 - `results/exp3_uncertainty.csv` — High/medium/low uncertainty comparison
@@ -223,14 +218,14 @@ chmod +x test.sh
 
 ## CLI Options
 
-| Option       | Description                                                    |
-|--------------|----------------------------------------------------------------|
-| `-algorithm` | `UFPMax`, `UGenMax`, `TODISMAX`, or `APFIMAX`                  |
-| `-input`     | Path to uncertain transaction database file                    |
-| `-output`    | Path to write results                                          |
+| Option       | Description                                                       |
+| ------------ | ----------------------------------------------------------------- |
+| `-algorithm` | `UFPMax`, `UGenMax`, `TODISMAX`, or `APFIMAX`                     |
+| `-input`     | Path to uncertain transaction database file                       |
+| `-output`    | Path to write results                                             |
 | `-minsup`    | Support threshold (double for UFPMax/UGenMax, int for TODIS/APFI) |
-| `-minprob`   | Probability threshold for TODISMAX/APFIMAX (e.g., 0.5, 0.9)   |
-| `-topk`      | Top-K mode for UFPMax/UGenMax only                             |
+| `-minprob`   | Probability threshold for TODISMAX/APFIMAX (e.g., 0.5, 0.9)       |
+| `-topk`      | Top-K mode for UFPMax/UGenMax only                                |
 
 ## Input Format
 
@@ -253,12 +248,12 @@ item1 item2 ... #PROB: probability         (TODISMAX/APFIMAX)
 
 ## Algorithms Overview
 
-| Algorithm | Support Model | Strategy | Speed |
-|-----------|--------------|----------|-------|
-| UGenMax   | Expected support | Bottom-up tidset intersection | Fastest for expected support |
-| UFPMax    | Expected support | Top-down conditional projection | Slightly slower |
-| TODIS-MAX | Probabilistic | Exact DP (O(nT) per candidate) | Slower but exact |
-| APFI-MAX  | Probabilistic | CLT approximation (O(n) per candidate) | 3-8x faster than TODIS-MAX |
+| Algorithm | Support Model    | Strategy                               | Speed                        |
+| --------- | ---------------- | -------------------------------------- | ---------------------------- |
+| UGenMax   | Expected support | Bottom-up tidset intersection          | Fastest for expected support |
+| UFPMax    | Expected support | Top-down conditional projection        | Slightly slower              |
+| TODIS-MAX | Probabilistic    | Exact DP (O(nT) per candidate)         | Slower but exact             |
+| APFI-MAX  | Probabilistic    | CLT approximation (O(n) per candidate) | 3-8x faster than TODIS-MAX   |
 
 ## Authors
 

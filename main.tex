@@ -95,7 +95,7 @@ VIETNAM GENERAL CONFEDERATION OF LABOUR\\
 \textbf{NGUYỄN CAO PHI -- 521V0006}\\
 
 \vspace{2cm}
-{\LARGE\textbf{A Comparative Analysis of FPMax and GenMax for Mining Frequent Maximal Itemsets from Uncertain Transaction Databases}}
+{\LARGE\textbf{Object-Oriented Solutions to the Problem of Mining Top-K Maximal Frequent Itemsets from Uncertain Databases}}
 
 \vspace{3cm}
 {\large\textbf{Information Technology Project -- 504091}}
@@ -115,7 +115,7 @@ VIETNAM GENERAL CONFEDERATION OF LABOUR\\
 
 VIETNAM GENERAL CONFEDERATION OF LABOUR\\
 \textbf{TON DUC THANG UNIVERSITY}\\
-\textbf{FACULTY OF INFORMATION TECHNOLOGY}\\888
+\textbf{FACULTY OF INFORMATION TECHNOLOGY}\\
 
 \vspace{1cm}
 \includegraphics[width=4.2cm]{tdtu_logo.png}
@@ -125,7 +125,7 @@ VIETNAM GENERAL CONFEDERATION OF LABOUR\\
 \textbf{NGUYỄN CAO PHI -- 521V0006}\\
 
 \vspace{2cm}
-{\LARGE\textbf{A Comparative Analysis of FPMax and GenMax for Mining Frequent Maximal Itemsets from Uncertain Transaction Databases}}
+{\LARGE\textbf{Object-Oriented Solutions to the Problem of Mining Top-K Maximal Frequent Itemsets from Uncertain Databases}}
 
 \vspace{1.5cm}
 {\large\textbf{Information Technology Project -- 504091}}
@@ -184,13 +184,13 @@ In addition, other comments, reviews and data used by other authors, and organiz
 
 Frequent itemset mining is a fundamental task in data mining. Classical algorithms assume binary transaction data where items are either present or absent. However, real-world databases often contain \textbf{uncertainty}: a barcode scanner might be only 80\% confident that it read a product correctly, a sensor might report a reading with known error margins, or data merged from multiple sources might contain conflicting entries. In such databases, each item is associated with an \textbf{existential probability} rather than a simple yes/no flag.
 
-This report addresses the problem of mining \textbf{frequent maximal itemsets} from uncertain transaction databases using two complementary support models. We implement and evaluate four algorithms:
+This report addresses the problem of mining \textbf{Top-K maximal frequent itemsets} from uncertain transaction databases using object-oriented design and two complementary support models. We implement and evaluate four algorithms:
 
 Under the \textbf{expected support model}: \textbf{UGenMax} adapts GenMax (Gouda and Zaki, 2005) using bottom-up weighted tidset intersections, and \textbf{UFPMax} adapts FPMax (Grahne and Zhu, 2003) using top-down conditional database projection. Both employ branch-and-bound search with anti-monotonicity pruning, progressive focusing, and dynamic Top-K threshold raising.
 
 Under the \textbf{probabilistic support model}: \textbf{TODIS-MAX} (based on Sun et al., 2010) provides exact probabilistic frequency computation via Dynamic Programming, and \textbf{APFI-MAX} (based on Chen et al., 2020) provides faster approximate estimation via the Central Limit Theorem.
 
-All algorithms are implemented in pure Java SE with no external dependencies. Experiments on three benchmark datasets (mushroom, retail, accidents) at three uncertainty levels show that: (1) UGenMax and UFPMax produce identical results, with UGenMax being 15--50\% faster; (2) TODIS-MAX and APFI-MAX produce matching results, with APFI-MAX being 3--8$\times$ faster; (3) all algorithms scale to 340K transactions.
+All algorithms are implemented in pure Java SE with no external dependencies, following object-oriented design principles with separate algorithm classes (no main method) and experiment classes (with main method and statistics output). Experiments on three benchmark datasets (mushroom, retail, accidents) at three uncertainty levels show that: (1) UGenMax and UFPMax produce identical results, with UGenMax being 15--50\% faster; (2) TODIS-MAX and APFI-MAX produce matching results, with APFI-MAX being 3--8$\times$ faster on mushroom and using significantly less memory on all datasets; (3) all algorithms scale to 340K transactions.
 
 \pagebreak
 
@@ -218,9 +218,16 @@ All algorithms are implemented in pure Java SE with no external dependencies. Ex
 \midrule
 FIM & Frequent Itemset Mining \\
 MFI & Maximal Frequent Itemset \\
+p-FP & Probabilistic Frequent Pattern \\
 DFS & Depth-First Search \\
+DP & Dynamic Programming \\
+CLT & Central Limit Theorem \\
+PMF & Probability Mass Function \\
+CDF & Cumulative Distribution Function \\
+PWS & Possible World Semantics \\
 expSup & Expected Support \\
-minsup & Minimum Expected Support Threshold \\
+minsup & Minimum Support Threshold \\
+minprob & Minimum Probability Threshold \\
 WT & Weighted Tidset \\
 DB & Database \\
 \bottomrule
@@ -871,7 +878,7 @@ Low certainty & $N(\mu{=}0.3, \sigma{=}0.15)$, clamped to $[0.1, 1.0]$ & High un
 \end{tabular}
 \end{table}
 
-This methodology follows standard practice in uncertain data mining research~\cite{chui2007,leung2008}.
+This methodology follows standard practice in uncertain data mining research~\cite{chui2007,leung2008}. All standard datasets are publicly available from the SPMF data mining library.\footnote{\url{https://www.philippe-fournier-viger.com/spmf/index.php?link=datasets.php}}
 
 \section{Configurations}
 
@@ -1013,12 +1020,12 @@ Low ($\mu$=0.3) & 9 & 264 & 87 & 11.0 & 16.5 \\
 
 \section{Probabilistic Support: TODIS-MAX vs.\ APFI-MAX}
 
-Table~\ref{tab:prob_comparison} compares the two probabilistic algorithms on mushroom\_medium.
+Table~\ref{tab:prob_mushroom} compares the two probabilistic algorithms on mushroom\_medium.
 
 \begin{table}[h]
 \centering
-\caption{TODIS-MAX vs.\ APFI-MAX on mushroom\_medium}
-\label{tab:prob_comparison}
+\caption{TODIS-MAX vs.\ APFI-MAX on mushroom\_medium (8,416 transactions)}
+\label{tab:prob_mushroom}
 \begin{tabular}{rrrrrrr}
 \toprule
 \textbf{minsup} & \textbf{$\tau$} & \multicolumn{2}{c}{\textbf{MFIs}} & \multicolumn{2}{c}{\textbf{Time (ms)}} \\
@@ -1034,13 +1041,32 @@ Table~\ref{tab:prob_comparison} compares the two probabilistic algorithms on mus
 \end{tabular}
 \end{table}
 
+Table~\ref{tab:prob_retail} shows results on the larger retail dataset (88,162 transactions).
+
+\begin{table}[h]
+\centering
+\caption{TODIS-MAX vs.\ APFI-MAX on retail\_medium (88,162 transactions)}
+\label{tab:prob_retail}
+\begin{tabular}{rrrrrrrr}
+\toprule
+\textbf{minsup} & \textbf{$\tau$} & \multicolumn{2}{c}{\textbf{MFIs}} & \multicolumn{2}{c}{\textbf{Time (s)}} & \multicolumn{2}{c}{\textbf{Memory (MB)}} \\
+ & & TODIS & APFI & TODIS & APFI & TODIS & APFI \\
+\midrule
+5000 & 0.5 & 4 & 4 & 78.5 & 115.4 & 147 & 51 \\
+5000 & 0.7 & 4 & 4 & 127.5 & 129.9 & 165 & 1 \\
+5000 & 0.9 & 4 & 4 & 128.9 & 126.6 & 326 & 48 \\
+10000 & 0.5 & 2 & 2 & 129.4 & 121.6 & 99 & 202 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \textbf{Key findings:}
 \begin{itemize}
-  \item APFI-MAX is \textbf{3--8$\times$ faster} than TODIS-MAX, confirming that the $O(n)$ CLT approximation is significantly faster than the $O(n \cdot T)$ exact DP computation.
-  \item Both produce \textbf{identical results} on this dataset, indicating that the CLT approximation is accurate for the mushroom dataset size ($n = 8416$).
-  \item Both algorithms generate the same number of candidates (135 at minsup=3000), as they use similar Apriori-based candidate generation.
-  \item Higher minprob ($\tau$) does not reduce the result count here because the p-FPs have high probability of being frequent.
-  \item APFI-MAX uses significantly less memory ($\sim$18 MB vs.\ up to 180 MB for TODIS-MAX) since it avoids the DP array.
+  \item On mushroom (8K transactions), APFI-MAX is \textbf{3--8$\times$ faster} than TODIS-MAX, confirming that the $O(n)$ CLT approximation is significantly faster than the $O(n \cdot T)$ exact DP computation.
+  \item Both produce \textbf{identical results} on both datasets, indicating that the CLT approximation is accurate for datasets with thousands of transactions.
+  \item On retail (88K transactions), the total time is dominated by candidate generation (scanning 88K transactions across 16,470 items). With only 4--6 candidates surviving the Apriori phase, the PMF computation itself is a small fraction of the total time. Consequently, the speed advantage of APFI-MAX's $O(n)$ frequency check over TODIS-MAX's $O(n \cdot T)$ DP is less pronounced.
+  \item APFI-MAX consistently uses \textbf{less memory} ($\sim$48--51 MB vs.\ up to 326 MB for TODIS-MAX on retail), since it avoids storing the DP array. On mushroom, memory savings are similarly significant ($\sim$18 MB vs.\ up to 180 MB).
+  \item The speed advantage of APFI-MAX becomes more significant when there are \textbf{many candidates} to verify (as on mushroom), because the per-candidate cost difference ($O(n)$ vs.\ $O(n \cdot T)$) is multiplied across all candidates.
 \end{itemize}
 
 \section{Cross-Model Comparison}
@@ -1058,7 +1084,7 @@ The expected support model (UFPMax/UGenMax) and probabilistic support model (TOD
 \begin{enumerate}
   \item \textbf{Correctness:} UGenMax and UFPMax produce identical results. TODIS-MAX and APFI-MAX produce matching results.
   \item \textbf{UGenMax vs.\ UFPMax:} UGenMax is consistently faster (15--50\%) with lower memory usage on all tested datasets (dense mushroom, sparse retail, and very dense accidents).
-  \item \textbf{TODIS-MAX vs.\ APFI-MAX:} APFI-MAX is 3--8$\times$ faster with much less memory, while producing identical results on the tested datasets.
+  \item \textbf{TODIS-MAX vs.\ APFI-MAX:} APFI-MAX is 3--8$\times$ faster on mushroom with much less memory. On the larger retail dataset, both have similar total time (dominated by candidate generation) but APFI-MAX still uses significantly less memory.
   \item \textbf{Uncertainty impact:} Higher certainty produces more MFIs; lower certainty requires lower thresholds.
   \item \textbf{Scalability:} All algorithms scale to 340K transactions (accidents) within acceptable time limits.
 \end{enumerate}
@@ -1158,7 +1184,7 @@ Pan, F., Cong, G., Tung, A.K.H., Yang, J., and Zaki, M.J. (2003). CARPENTER: Fin
 Sun, L., Cheng, R., Cheung, D.W., and Cheng, J. (2010). Mining uncertain data with probabilistic guarantees. \textit{Proc. ACM SIGKDD}, pp.~273--282.
 
 \bibitem{chen2020}
-Chen, L., Liu, Y., Zheng, Z., and Yu, P.S. (2020). Approximation of probabilistic maximal frequent itemset mining over uncertain sensed data. \textit{IEEE Access}, 8, pp.~51513--51526.
+Chen, S., Nie, L., Tao, X., Li, Z., and Zhao, L. (2020). Approximation of probabilistic maximal frequent itemset mining over uncertain sensed data. \textit{IEEE Access}, 8, pp.~97529--97539.
 
 \bibitem{szathmary2006}
 Szathmary, L., Napoli, A., and Valtchev, P. (2006). Towards rare itemset mining. \textit{Proc. IEEE ICTAI}.
