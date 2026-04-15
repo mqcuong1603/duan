@@ -12,7 +12,7 @@ transaction databases, implementing both major support models.
 
 ## Requirements
 
-- Java 21 or newer
+- Java 25
 - No external libraries (no Maven/Gradle needed)
 
 ## Project Layout
@@ -84,46 +84,66 @@ Distributions: `high` N(0.8, 0.1), `medium` N(0.5, 0.2), `low` N(0.3, 0.15), `un
 
 ### Examples
 
+Run one algorithm on one dataset and write the maximal itemsets to a file.
+This is the plain "use the tool" mode — minimal console output, no statistics.
+
 ```bash
 # Expected support (UFPMax / UGenMax)
-java -cp bin Main -algorithm UFPMax  -input data/contextUncertain.txt -output out.txt -minsup 1.5
-java -cp bin Main -algorithm UGenMax -input data/mushroom_medium.txt  -output out.txt -topk 10
+java -cp bin Main -algorithm UFPMax  -input data/retail_medium.txt -output out.txt -minsup 3000
+java -cp bin Main -algorithm UGenMax -input data/retail_medium.txt -output out.txt -topk 10
 
 # Probabilistic support (TODISMAX / APFIMAX)
-java -cp bin Main -algorithm TODISMAX -input data/mushroom_medium.txt -output out.txt -minsup 3000 -minprob 0.5
-java -cp bin Main -algorithm APFIMAX  -input data/mushroom_medium.txt -output out.txt -minsup 3000 -minprob 0.5
+java -cp bin Main -algorithm TODISMAX -input data/retail_medium.txt -output out.txt -minsup 3000 -minprob 0.5
+java -cp bin Main -algorithm APFIMAX  -input data/retail_medium.txt -output out.txt -minsup 3000 -minprob 0.5
 ```
 
-## Experiments & Benchmarks
+## Experiments
 
-Each experiment class prints results plus timing, memory, and pruning stats.
+An **experiment** runs a single algorithm once and, in addition to the result
+itemsets, reports performance measurements collected by `PerformanceTracker`:
+execution time, memory usage, and pruning counts. Use this when you want to
+measure one algorithm on one dataset.
 
 ```bash
-# Individual experiments
-java -cp bin experiment.ExpUFPMax   data/mushroom_medium.txt 2000
-java -cp bin experiment.ExpUGenMax  data/mushroom_medium.txt 2000
-java -cp bin experiment.ExpTODISMAX data/mushroom_medium.txt 3000 0.5
-java -cp bin experiment.ExpAPFIMAX  data/mushroom_medium.txt 3000 0.5
+java -cp bin experiment.ExpUFPMax   data/retail_medium.txt 3000
+java -cp bin experiment.ExpUGenMax  data/retail_medium.txt 3000
+java -cp bin experiment.ExpTODISMAX data/retail_medium.txt 3000 0.5
+java -cp bin experiment.ExpAPFIMAX  data/retail_medium.txt 3000 0.5
+```
 
-# Full benchmark suite (writes CSV files to results/)
+## Full Benchmark Suite
+
+The **benchmark suite** (`ExperimentRunner`) is the automated harness used to
+produce the numbers in the report. It runs *all four algorithms* across
+*multiple datasets* (mushroom, retail, accidents) at *multiple parameter
+values*, with 1 warm-up run and 3 measured runs averaged, and writes four CSV
+files ready for plotting:
+
+```bash
 java -Xmx4g -cp bin experiment.ExperimentRunner results
 ```
 
-The full suite produces:
+Outputs in `results/`:
 
 - `exp1_expected_support.csv` — UFPMax vs UGenMax across minsup
 - `exp2_probabilistic.csv` — TODISMAX vs APFIMAX across minsup/minprob
 - `exp3_uncertainty.csv` — high vs medium vs low uncertainty
 - `exp4_scalability.csv` — mushroom vs retail vs accidents
 
+**In short:** *examples* run the tool; *experiments* measure one algorithm;
+the *benchmark suite* runs everything and emits CSVs.
+
 ## Quick Sanity Check
 
-Verify the build on the small bundled dataset:
+A sanity check is a short smoke test that verifies the build works before
+running anything heavy. UFPMax and UGenMax are two different algorithms that
+must produce the *same* set of maximal itemsets, so running both on the tiny
+bundled dataset and `diff`-ing the outputs quickly confirms correctness:
 
 ```bash
 java -cp bin Main -algorithm UFPMax  -input data/contextUncertain.txt -output /tmp/a.txt -minsup 1.0
 java -cp bin Main -algorithm UGenMax -input data/contextUncertain.txt -output /tmp/b.txt -minsup 1.0
-diff /tmp/a.txt /tmp/b.txt   # should be identical
+diff /tmp/a.txt /tmp/b.txt   # no output = pass
 ```
 
 ## Authors
