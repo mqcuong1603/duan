@@ -1,0 +1,7 @@
+dataset,transactions,items,algorithm,minsup,mfis,time_ms,memory_mb
+mushroom,8416,120,UFPMax,2000,14,41,22.1
+mushroom,8416,120,UGenMax,2000,14,14,23.9
+retail,88162,16470,UFPMax,5000,4,127,130.0
+retail,88162,16470,UGenMax,5000,4,64,82.0
+accidents,340183,468,UFPMax,50000,154,11916,1552.0
+accidents,340183,468,UGenMax,50000,154,8222,1180.0
