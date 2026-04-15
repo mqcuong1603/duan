@@ -144,26 +144,11 @@ Note that the two algorithms emit itemsets in different orders (UFPMax is
 top-down, UGenMax is bottom-up), so the comparison must be **order-insensitive**
 — sort both files before diffing.
 
-**Linux / macOS:**
 
 ```bash
 java -cp bin Main -algorithm UFPMax  -input data/contextUncertain.txt -output out_a.txt -minsup 1.0
-java -cp bin Main -algorithm UGenMax -input data/contextUncertain.txt -output out_b.txt -minsup 1.0
-diff <(sort out_a.txt) <(sort out_b.txt)   # no output = pass
+java -cp bin Main -algorithm UGenMax -input data/contextUncertain.txt -output out_b.txt -minsup 1.0  # no output = pass
 ```
-
-**Windows (PowerShell):**
-
-```powershell
-java -cp bin Main -algorithm UFPMax  -input data/contextUncertain.txt -output out_a.txt -minsup 1.0
-java -cp bin Main -algorithm UGenMax -input data/contextUncertain.txt -output out_b.txt -minsup 1.0
-Compare-Object (Get-Content out_a.txt | Sort-Object) (Get-Content out_b.txt | Sort-Object)
-# no output = pass
-```
-
-> Note: `/tmp/` does not exist on Windows, and PowerShell's `diff` is an alias
-> for `Compare-Object` that compares its *arguments* unless you pipe file
-> contents in with `Get-Content`.
 
 ## Authors
 
