@@ -246,15 +246,9 @@ More formally, given a database of transactions (where each transaction is a set
 
 \section{The Challenge of Uncertainty}
 
-Classical algorithms assume perfect data: an item is either in a transaction or it is not. In practice, data is often imperfect. Consider these real-world scenarios:
+Classical algorithms assume perfect data: an item is either in a transaction or it is not. In practice, data is often imperfect. A temperature sensor, for example, reports values with a known error margin, so when the system logs that the sensor detected item A it might only be 85\% confident in that reading. In a data-integration setting, merging customer records from two different databases produces ambiguous matches: a merged record might indicate that a customer purchased item B, but with only 70\% confidence because of name or address mismatches. Privacy-preserving systems introduce yet another form of uncertainty by deliberately adding random noise so that each item's presence becomes probabilistic rather than certain.
 
-\begin{itemize}
-  \item \textbf{Sensor networks.} A temperature sensor reports values with a known error margin. When the system logs that a sensor detected item A, it might only be 85\% confident in that reading.
-  \item \textbf{Data integration.} When merging customer records from two different databases, some matches are ambiguous. A merged record might indicate that a customer purchased item B, but with only 70\% confidence due to name/address mismatches.
-  \item \textbf{Privacy preservation.} To protect user privacy, a system deliberately adds random noise to transaction data. Each item's presence is now probabilistic rather than certain.
-\end{itemize}
-
-In all these cases, the result is an \textbf{uncertain transaction database} where each item in each transaction carries a probability between 0 and 1. The challenge is: how do we mine meaningful patterns from data that we are not entirely sure about?
+In all these cases, the result is an \textbf{uncertain transaction database} where each item in each transaction carries a probability between 0 and 1, and the challenge becomes how to mine meaningful patterns from data that we are not entirely sure about.
 
 \section{Why Maximal Itemsets?}
 
@@ -289,15 +283,7 @@ The Apriori algorithm~\cite{agrawal1994} was the first efficient algorithm for f
 
 \section{Mining Maximal Frequent Itemsets}
 
-Several algorithms have been developed specifically for maximal frequent itemset mining:
-
-\begin{itemize}
-  \item \textbf{MaxMiner}~\cite{bayardo1998} was the first to use a look-ahead pruning strategy.
-  \item \textbf{GenMax}~\cite{gouda2005} introduced depth-first backtracking with tidsets and progressive focusing. Our UGenMax adapts this algorithm.
-  \item \textbf{FPMax}~\cite{grahne2003} extended FP-Growth with MFI-tree superset checking. Our UFPMax adapts this algorithm.
-  \item \textbf{CARPENTER-MAX}~\cite{pan2003} was designed for datasets with many items but few transactions.
-  \item \textbf{Charm-MFI}~\cite{szathmary2006} discovers maximal itemsets by post-processing closed itemsets.
-\end{itemize}
+Several algorithms have been developed specifically for maximal frequent itemset mining. MaxMiner~\cite{bayardo1998} was the first to use a look-ahead pruning strategy. GenMax~\cite{gouda2005} introduced depth-first backtracking with tidsets and progressive focusing, and is the basis for our UGenMax. FPMax~\cite{grahne2003} extended FP-Growth with MFI-tree superset checking, and is the basis for our UFPMax. CARPENTER-MAX~\cite{pan2003} was designed for datasets with many items but few transactions, and Charm-MFI~\cite{szathmary2006} discovers maximal itemsets by post-processing closed itemsets.
 
 \section{Uncertain Database Mining}
 
@@ -746,12 +732,7 @@ where $\Phi$ is the standard normal CDF. This runs in $O(n)$ per itemset --- sig
 
 \subsection{Expectation Bounds}
 
-APFI-MAX uses tighter pruning via expectation bounds derived from the CLT:
-
-\begin{itemize}
-  \item \textbf{Lower bound:} If $E[\text{sup}(X)] < lb(E)$, then $X$ cannot be a p-FP regardless of variance. The lower bound $lb(E)$ is computed from the Chernoff inequality.
-  \item \textbf{Upper bound:} If $E[\text{sup}(X)] \geq ub(E)$, then $X$ is definitely a p-FP. The upper bound is $ub(E) = T + z_\tau \cdot \sqrt{E}$, where $z_\tau = \Phi^{-1}(1 - \tau)$.
-\end{itemize}
+APFI-MAX uses tighter pruning via expectation bounds derived from the CLT. A lower bound $lb(E)$, obtained from the Chernoff inequality, rules out any itemset with $E[\text{sup}(X)] < lb(E)$, which cannot be a p-FP regardless of its variance. An upper bound $ub(E) = T + z_\tau \cdot \sqrt{E}$, with $z_\tau = \Phi^{-1}(1 - \tau)$, certifies any itemset with $E[\text{sup}(X)] \geq ub(E)$ as definitely a p-FP without needing a full PMF computation.
 
 \subsection{Algorithm Overview}
 
@@ -874,11 +855,7 @@ For each configuration we record: time (ms), memory (MB), number of MFIs, and al
 
 \section{Correctness Validation}
 
-\begin{itemize}
-  \item UGenMax and UFPMax produce identical MFI sets for all configurations (cross-algorithm agreement).
-  \item Hand verification on contextUncertain for all four algorithms.
-  \item TODIS-MAX and APFI-MAX compared: APFI-MAX may produce slightly different results due to CLT approximation, but should closely match TODIS-MAX.
-\end{itemize}
+Correctness is validated in three ways. All four algorithms are first hand-verified on the small contextUncertain example. UGenMax and UFPMax are then cross-checked against each other on every configuration to confirm they produce identical MFI sets. TODIS-MAX and APFI-MAX are similarly compared; although APFI-MAX may in principle produce slightly different results because of the CLT approximation, it should closely match TODIS-MAX on the datasets we evaluate.
 
 \section{Performance Measurement}
 
@@ -916,14 +893,7 @@ Retail is our primary benchmark for the expected-support model: 88,162 transacti
 \end{tabular}
 \end{table}
 
-\textbf{Observations on retail\_medium:}
-\begin{itemize}
-  \item As minsup rises, both the MFI count and execution time decrease, as expected from anti-monotonicity pruning.
-  \item UGenMax is consistently faster than UFPMax across every minsup tested. Speedups range from 19\% at minsup=2000 (71 vs.\ 88 ms) up to 43\% at minsup=1000 (93 vs.\ 164 ms).
-  \item UGenMax also uses roughly 30--35\% less memory at every minsup --- the weighted-tidset representation is more compact than UFPMax's projected conditional databases on this sparse dataset.
-  \item The absolute runtime is small (well under 200 ms) even at the most permissive threshold, because most of the 16,470 items are infrequent and pruned early. Runtime is dominated by database loading and tidset/projection construction rather than by the search itself.
-  \item At high minsup ($\geq 3000$), only 2--4 MFIs are found, which is typical for a sparse transactional dataset where long co-occurrence patterns are rare.
-\end{itemize}
+\textbf{Observations on retail\_medium.} As minsup rises, both the MFI count and execution time decrease, consistent with anti-monotonicity pruning. UGenMax is faster than UFPMax at every minsup tested, with speedups ranging from 19\% at minsup=2000 (71 vs.\ 88 ms) up to 43\% at minsup=1000 (93 vs.\ 164 ms), and it uses roughly 30--35\% less memory because the weighted-tidset representation is more compact than UFPMax's projected conditional databases on this sparse dataset. Absolute runtime stays well under 200 ms even at the most permissive threshold, because most of the 16,470 items are infrequent and pruned early --- the cost is dominated by database loading and tidset/projection construction rather than by the search itself. At high minsup ($\geq 3000$) only 2--4 MFIs are found, which is typical for a sparse transactional dataset where long co-occurrence patterns are rare.
 
 \section{Expected Support on mushroom\_medium (Secondary Dataset)}
 
@@ -973,13 +943,7 @@ Table~\ref{tab:accidents} shows results on the accidents dataset, which is the l
 \end{tabular}
 \end{table}
 
-\textbf{Observations:}
-\begin{itemize}
-  \item Both algorithms scale to 340K transactions with results in seconds to tens of seconds.
-  \item UGenMax is 13--36\% faster than UFPMax at minsup $\geq$ 30,000 on this very dense dataset. At the lowest threshold (minsup=20,000), the two algorithms are essentially tied (UGenMax is marginally slower, 48.8 s vs.\ 47.4 s), because the very large result set of 1,285 MFIs erases most of the progressive-focusing advantage.
-  \item At low minsup (20,000), the search discovers 1,285 MFIs, demonstrating that the algorithms handle large result sets effectively.
-  \item Memory usage reaches $\sim$1.4 GB at low thresholds due to the large number of items per transaction ($\sim$33 items on average out of 468). On this dataset the two algorithms use comparable memory (UFPMax ranges 803--1,401 MB; UGenMax ranges 960--1,118 MB).
-\end{itemize}
+\textbf{Observations.} Both algorithms scale to 340K transactions, returning results in seconds to tens of seconds. UGenMax is 13--36\% faster than UFPMax at minsup $\geq$ 30,000 on this very dense dataset; at the lowest threshold (minsup=20,000) the two algorithms are essentially tied (UGenMax is marginally slower, 48.8 s vs.\ 47.4 s), because the very large result set of 1,285 MFIs erases most of the progressive-focusing advantage. That the search at minsup=20,000 still completes in under a minute while producing 1,285 MFIs shows that both algorithms handle large result sets effectively. Memory usage reaches $\sim$1.4 GB at low thresholds due to the large number of items per transaction ($\sim$33 items on average out of 468); here UFPMax and UGenMax use comparable memory (803--1,401 MB and 960--1,118 MB respectively).
 
 \section{Cross-Dataset Scalability Snapshot}
 
@@ -1037,13 +1001,7 @@ We first evaluate TODIS-MAX and APFI-MAX on the primary retail dataset. Table~\r
 \end{tabular}
 \end{table}
 
-\textbf{Observations on retail\_medium:}
-\begin{itemize}
-  \item \textbf{Matching MFI counts.} Across all 15 configurations, TODIS-MAX and APFI-MAX return the same MFI count, so the CLT approximation preserves correctness on this 88K-transaction dataset.
-  \item \textbf{Total time is comparable.} Most runs take 60--66\,s for both algorithms; total time is dominated by database loading and Apriori candidate generation across the 16,470-item space, not by the frequency-measurement step. The $O(n)$ vs.\ $O(n \cdot T)$ per-candidate cost difference therefore has little effect, since the number of surviving candidates is small (0--4).
-  \item \textbf{A few outliers.} TODIS-MAX at (minsup=5000, $\tau$=0.7) took 135.3\,s --- noticeably above the baseline 60--66\,s; similarly APFI-MAX at (5000, 0.9) took 90.8\,s and at (10000, 0.5) took 118.1\,s. These variations come from the non-deterministic portion of the Apriori phase (hashing / GC effects), not from the algorithmic core.
-  \item \textbf{APFI-MAX uses dramatically less memory.} APFI-MAX sits at a steady 25--53\,MB across all non-trivial configurations, while TODIS-MAX spikes to 127--449\,MB whenever its DP array must be allocated. When no MFIs are found (minsup=30,000), the two algorithms converge in memory (21.1\,MB each).
-\end{itemize}
+\textbf{Observations on retail\_medium.} Across all 15 configurations, TODIS-MAX and APFI-MAX return the same MFI count, so the CLT approximation preserves correctness on this 88K-transaction dataset. Most runs take 60--66\,s for both algorithms, because the total time is dominated by database loading and Apriori candidate generation across the 16,470-item space, not by the frequency-measurement step; the $O(n)$ versus $O(n \cdot T)$ per-candidate difference has little effect here because only 0--4 candidates survive Apriori. A few outliers stand out --- TODIS-MAX at (minsup=5000, $\tau$=0.7) took 135.3\,s, and APFI-MAX took 90.8\,s at (5000, 0.9) and 118.1\,s at (10000, 0.5) --- but these reflect the non-deterministic portion of the Apriori phase (hashing and GC effects) rather than the algorithmic core. The clearest separation between the two algorithms is in memory: APFI-MAX sits at a steady 25--53\,MB across all non-trivial configurations, while TODIS-MAX spikes to 127--449\,MB whenever its DP array must be allocated. When no MFIs are found (minsup=30,000), the two algorithms converge to 21.1\,MB each.
 
 \section{Probabilistic Support on mushroom\_medium (Secondary Dataset)}
 
@@ -1077,33 +1035,17 @@ On the smaller, denser mushroom dataset, the per-candidate frequency cost become
 \end{tabular}
 \end{table}
 
-\textbf{Observations on mushroom\_medium:}
-\begin{itemize}
-  \item \textbf{Matching MFI counts across all 15 rows}, again confirming that the CLT approximation matches the exact DP result on this dataset.
-  \item \textbf{APFI-MAX is 12--17$\times$ faster} whenever there are surviving candidates to verify (minsup $\in \{3000, 4000\}$): e.g.\ 519/37 = 14.0$\times$, 488/30 = 16.3$\times$, 304/23 = 13.2$\times$. For minsup $\geq 5000$ the Apriori phase prunes everything before frequency measurement, so both algorithms finish in 16--26\,ms and the speedup vanishes.
-  \item \textbf{Memory is also consistently lower for APFI-MAX} when any PMF computation is actually performed (6--35 MB vs.\ up to 160 MB for TODIS-MAX), because APFI-MAX stores only running sums instead of a length-$T$ DP array.
-\end{itemize}
+\textbf{Observations on mushroom\_medium.} MFI counts match across all 15 rows, again confirming that the CLT approximation matches the exact DP result. APFI-MAX is 12--17$\times$ faster whenever there are surviving candidates to verify (minsup $\in \{3000, 4000\}$), for example 519/37\,$\approx$\,14.0$\times$, 488/30\,$\approx$\,16.3$\times$, and 304/23\,$\approx$\,13.2$\times$; for minsup $\geq 5000$ the Apriori phase prunes everything before frequency measurement, so both algorithms finish in 16--26\,ms and the speedup vanishes. Memory is also consistently lower for APFI-MAX when any PMF computation is actually performed (6--35\,MB vs.\ up to 160\,MB for TODIS-MAX), because APFI-MAX stores only running sums instead of a length-$T$ DP array.
 
 \textbf{Cross-dataset takeaway.} The speed advantage of APFI-MAX is largest when there are \emph{many} candidates surviving Apriori, because the per-candidate saving ($O(n)$ vs.\ $O(n \cdot T)$) is multiplied across them. On retail the small surviving candidate count caps the achievable speedup; on mushroom it is fully realised.
 
 \section{Cross-Model Comparison}
 
-The expected support model (UFPMax/UGenMax) and probabilistic support model (TODIS-MAX/APFI-MAX) serve complementary purposes:
-
-\begin{itemize}
-  \item \textbf{Expected support} is faster and simpler but treats all transactions equally: an itemset with 0.01 probability in each of 1000 transactions can have the same expected support as one with 1.0 probability in 10 transactions.
-  \item \textbf{Probabilistic support} distinguishes these cases by asking ``what is the probability that this itemset appears at least $T$ times?'' This gives a more statistically rigorous measure of frequency.
-  \item For practitioners: use expected support for quick exploratory analysis, and probabilistic support when statistical guarantees matter.
-\end{itemize}
+The expected support model (UFPMax/UGenMax) and the probabilistic support model (TODIS-MAX/APFI-MAX) serve complementary purposes. Expected support is faster and simpler but treats all transactions equally: an itemset with 0.01 probability in each of 1000 transactions can have the same expected support as one with 1.0 probability in 10 transactions. Probabilistic support distinguishes these cases by asking ``what is the probability that this itemset appears at least $T$ times?'', giving a more statistically rigorous measure of frequency. For practitioners, then, expected support is best suited to quick exploratory analysis, while probabilistic support should be preferred when statistical guarantees matter.
 
 \section{Summary of Findings}
 
-\begin{enumerate}
-  \item \textbf{Correctness:} UGenMax and UFPMax produce identical MFI sets across all datasets and thresholds. TODIS-MAX and APFI-MAX produce matching MFI counts across every configuration measured.
-  \item \textbf{UGenMax vs.\ UFPMax (primary: retail):} UGenMax is 19--43\% faster than UFPMax on the primary retail\_medium dataset and uses roughly 30--35\% less memory. The advantage generalises to dense mushroom (42--66\% faster) and to very dense accidents (13--36\% faster at minsup $\geq$ 30,000; essentially tied at minsup=20,000).
-  \item \textbf{TODIS-MAX vs.\ APFI-MAX (primary: retail):} On retail\_medium, both algorithms have comparable total time (dominated by Apriori candidate generation) but APFI-MAX uses dramatically less memory (25--53 MB vs.\ up to 449 MB). On the smaller mushroom dataset, APFI-MAX is also 12--17$\times$ faster whenever there are surviving candidates.
-  \item \textbf{Scalability:} All algorithms scale to 340K transactions (accidents) within acceptable time limits, and UGenMax retains a per-dataset speed advantage from mushroom (8K) through accidents (340K).
-\end{enumerate}
+Taking the Chapter~6 results together, four findings stand out. First, correctness holds throughout: UGenMax and UFPMax produce identical MFI sets across all datasets and thresholds, and TODIS-MAX and APFI-MAX produce matching MFI counts across every configuration we measured. Second, on the primary retail\_medium dataset UGenMax is 19--43\% faster than UFPMax and uses roughly 30--35\% less memory --- an advantage that generalises to dense mushroom (42--66\% faster) and to very dense accidents (13--36\% faster at minsup $\geq$ 30,000, essentially tied at minsup=20,000). Third, on retail\_medium the two probabilistic algorithms have comparable total time --- because Apriori candidate generation dominates --- but APFI-MAX uses dramatically less memory (25--53\,MB vs.\ up to 449\,MB for TODIS-MAX), and on the smaller mushroom dataset APFI-MAX is additionally 12--17$\times$ faster whenever there are surviving candidates. Finally, all algorithms scale to 340K transactions (accidents) within acceptable time limits, and UGenMax retains its per-dataset speed advantage across the whole range from 8K to 340K transactions.
 
 % ============================================================
 % CHAPTER 7: CONCLUSIONS
@@ -1112,45 +1054,21 @@ The expected support model (UFPMax/UGenMax) and probabilistic support model (TOD
 
 \section{Summary}
 
-This project designed, implemented, and evaluated four algorithms for mining frequent maximal itemsets from uncertain transaction databases, covering two support models:
-
-\begin{itemize}
-  \item \textbf{Expected support model:} UGenMax (bottom-up weighted tidset intersections, adapted from GenMax) and UFPMax (top-down conditional database projection, adapted from FPMax). Both use branch-and-bound with three pruning strategies: anti-monotonicity, progressive focusing, and dynamic Top-K threshold raising.
-  \item \textbf{Probabilistic support model:} TODIS-MAX (exact PMF computation via Dynamic Programming, based on Sun et al., 2010) and APFI-MAX (approximate frequency estimation via CLT, based on Chen et al., 2020). Both use Apriori-based candidate generation with top-down maximal verification.
-\end{itemize}
+This project designed, implemented, and evaluated four algorithms for mining frequent maximal itemsets from uncertain transaction databases, covering two support models. Under the expected support model, UGenMax (bottom-up weighted tidset intersections, adapted from GenMax) and UFPMax (top-down conditional database projection, adapted from FPMax) both use branch-and-bound with three pruning strategies: anti-monotonicity, progressive focusing, and dynamic Top-K threshold raising. Under the probabilistic support model, TODIS-MAX (exact PMF computation via Dynamic Programming, based on Sun et al., 2010) and APFI-MAX (approximate frequency estimation via CLT, based on Chen et al., 2020) share an Apriori-based candidate generation phase followed by top-down maximal verification.
 
 Experiments on three benchmark datasets (mushroom, retail, accidents) at medium uncertainty, with retail\_medium as the primary benchmark, demonstrate that all algorithms produce correct results and exhibit distinct performance characteristics.
 
 \section{Key Contributions}
 
-\begin{enumerate}
-  \item Formalized the problem with precise mathematical definitions for both expected support and probabilistic support models.
-  \item Adapted GenMax and FPMax for uncertain data with expected support, including Top-K mode.
-  \item Implemented TODIS-MAX and APFI-MAX for probabilistic maximal frequent itemset mining.
-  \item Clean Java SE implementation with no external dependencies, organized into algorithm classes (no main) and experiment classes (with main and statistics output).
-  \item Comprehensive experimental comparison across 3 datasets, 3 uncertainty levels, 4 algorithms, and varying parameter configurations, revealing that UGenMax outperforms UFPMax and APFI-MAX outperforms TODIS-MAX in speed.
-\end{enumerate}
+The project's main contributions are as follows. We formalised the problem with precise mathematical definitions for both the expected support and the probabilistic support models. We adapted GenMax and FPMax for uncertain data with expected support, including a Top-K mode, and implemented TODIS-MAX and APFI-MAX for probabilistic maximal frequent itemset mining. The whole code base is pure Java SE with no external dependencies, organised into algorithm classes (no \texttt{main}) and experiment classes (with \texttt{main} and statistics output). Finally, we carried out a comprehensive experimental comparison across three datasets, four algorithms, and varying parameter configurations at medium uncertainty, showing that UGenMax consistently outperforms UFPMax in speed, and that APFI-MAX matches TODIS-MAX in correctness while using dramatically less memory and, on mushroom, running an order of magnitude faster.
 
 \section{Limitations}
 
-\begin{itemize}
-  \item Maximality checking uses linear scan ($O(|\text{MFI}|)$ per check); a trie or hash-based approach could improve this.
-  \item APFI-MAX's CLT approximation may be less accurate for small datasets where the normal approximation is poor.
-  \item TODIS-MAX and APFI-MAX do not support Top-K mode.
-  \item Memory usage on the accidents dataset reaches $\sim$1.4 GB at low thresholds.
-\end{itemize}
+Several limitations remain. Maximality checking uses a linear scan ($O(|\text{MFI}|)$ per check), which a trie- or hash-based index could improve. APFI-MAX's CLT approximation may become less accurate for small datasets where the normal approximation is poor, and neither TODIS-MAX nor APFI-MAX currently supports Top-K mode. Memory usage on the accidents dataset also reaches roughly 1.4\,GB at low thresholds, which may be restrictive in memory-constrained environments.
 
 \section{Future Work}
 
-Possible extensions include:
-\begin{itemize}
-  \item Diffset optimization for UGenMax to reduce memory usage.
-  \item Parallel search across independent subtrees for multi-core speedup.
-  \item Extension to mining closed or sequential patterns from uncertain data.
-  \item Evaluation on real-world uncertain datasets from sensor networks or noisy data integration.
-  \item Top-K mode for probabilistic algorithms.
-  \item GPU acceleration for the DP-based PMF computation in TODIS-MAX.
-\end{itemize}
+A natural next step is a diffset optimisation for UGenMax to reduce memory usage, followed by parallel search across independent subtrees for multi-core speedup. The framework could also be extended to mining closed or sequential patterns from uncertain data, and evaluated on real-world uncertain datasets from sensor networks or noisy data integration. Adding a Top-K mode to the probabilistic algorithms, and exploring GPU acceleration for the DP-based PMF computation in TODIS-MAX, are further promising directions.
 
 % ============================================================
 % REFERENCES
