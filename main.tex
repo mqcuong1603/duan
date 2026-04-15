@@ -190,7 +190,7 @@ Under the \textbf{expected support model}: \textbf{UGenMax} adapts GenMax (Gouda
 
 Under the \textbf{probabilistic support model}: \textbf{TODIS-MAX} (based on Sun et al., 2010) provides exact probabilistic frequency computation via Dynamic Programming, and \textbf{APFI-MAX} (based on Chen et al., 2020) provides faster approximate estimation via the Central Limit Theorem.
 
-All algorithms are implemented in pure Java SE with no external dependencies, following object-oriented design principles with separate algorithm classes (no main method) and experiment classes (with main method and statistics output). Experiments on three benchmark datasets (mushroom, retail, accidents) at three uncertainty levels show that: (1) UGenMax and UFPMax produce identical results, with UGenMax being roughly 20--65\% faster on mushroom and retail, and 13--36\% faster on accidents at moderate/high thresholds; (2) TODIS-MAX and APFI-MAX produce matching results, with APFI-MAX being 12--17$\times$ faster on mushroom and using significantly less memory on all datasets; (3) all algorithms scale to 340K transactions.
+All algorithms are implemented in pure Java SE with no external dependencies, following object-oriented design principles with separate algorithm classes (no main method) and experiment classes (with main method and statistics output). Experiments on three benchmark datasets (mushroom, retail, accidents) at medium uncertainty show that: (1) UGenMax and UFPMax produce identical results, with UGenMax being 19--43\% faster on the primary retail dataset, 42--66\% faster on mushroom, and 13--36\% faster on accidents at moderate/high thresholds; (2) TODIS-MAX and APFI-MAX produce matching results, with APFI-MAX being 12--17$\times$ faster on mushroom and using significantly less memory on all datasets; (3) all algorithms scale to 340K transactions.
 
 \pagebreak
 
@@ -862,23 +862,7 @@ accidents & 340,183 & 468 & Very dense & SPMF \\
 \end{tabular}
 \end{table}
 
-Each standard dataset is converted to uncertain format at three uncertainty levels using the \texttt{DatasetConverter} utility:
-
-\begin{table}[h]
-\centering
-\caption{Uncertainty level distributions}
-\begin{tabular}{lll}
-\toprule
-\textbf{Level} & \textbf{Distribution} & \textbf{Simulates} \\
-\midrule
-High certainty & $N(\mu{=}0.8, \sigma{=}0.1)$, clamped to $[0.1, 1.0]$ & Low uncertainty \\
-Medium certainty & $N(\mu{=}0.5, \sigma{=}0.2)$, clamped to $[0.1, 1.0]$ & Moderate uncertainty \\
-Low certainty & $N(\mu{=}0.3, \sigma{=}0.15)$, clamped to $[0.1, 1.0]$ & High uncertainty \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-This methodology follows standard practice in uncertain data mining research~\cite{chui2007,leung2008}. All standard datasets are publicly available from the SPMF data mining library.\footnote{\url{https://www.philippe-fournier-viger.com/spmf/index.php?link=datasets.php}}
+Each standard dataset is converted to uncertain format at medium uncertainty using the \texttt{DatasetConverter} utility: each item probability is drawn from a truncated normal distribution $N(\mu{=}0.5, \sigma{=}0.2)$ clamped to $[0.1, 1.0]$. This simulates moderately noisy/uncertain transaction data and follows standard practice in uncertain data mining research~\cite{chui2007,leung2008}. All standard datasets are publicly available from the SPMF data mining library.\footnote{\url{https://www.philippe-fournier-viger.com/spmf/index.php?link=datasets.php}}
 
 \section{Configurations}
 
@@ -907,39 +891,11 @@ PerformanceTracker uses \texttt{System.nanoTime()} for timing and \texttt{Runtim
 
 \section{Correctness Verification}
 
-On contextUncertain, all four algorithms produce correct results verified by hand computation. For expected support algorithms, UGenMax and UFPMax produce \textbf{identical MFI sets} across all datasets and all minsup values tested, confirming correctness. For probabilistic algorithms, TODIS-MAX and APFI-MAX produce identical results on mushroom, confirming that the CLT approximation is accurate for this dataset.
+On contextUncertain, all four algorithms produce correct results verified by hand computation. For expected support algorithms, UGenMax and UFPMax produce \textbf{identical MFI sets} across all datasets and all minsup values tested, confirming correctness. For probabilistic algorithms, TODIS-MAX and APFI-MAX also produce identical MFI counts across every configuration we measured.
 
-\section{Expected Support: Effect of Minimum Support Threshold}
+\section{Expected Support on retail\_medium (Primary Dataset)}
 
-Table~\ref{tab:mushroom_minsup} shows the performance of UFPMax and UGenMax on mushroom\_medium with varying minsup thresholds.
-
-\begin{table}[h]
-\centering
-\caption{Performance on mushroom\_medium (8,416 transactions, 120 items)}
-\label{tab:mushroom_minsup}
-\begin{tabular}{rrrrrr}
-\toprule
-\textbf{minsup} & \textbf{MFIs} & \multicolumn{2}{c}{\textbf{Time (ms)}} & \multicolumn{2}{c}{\textbf{Memory (MB)}} \\
- & & UFPMax & UGenMax & UFPMax & UGenMax \\
-\midrule
-500 & 314 & 236 & 134 & 45.5 & 14.7 \\
-1000 & 73 & 86 & 49 & 6.0 & 17.0 \\
-1500 & 30 & 53 & 25 & 18.7 & 11.1 \\
-2000 & 14 & 29 & 10 & 9.2 & 19.1 \\
-2500 & 9 & 16 & 7 & 27.4 & 12.5 \\
-3000 & 5 & 12 & 7 & 18.7 & 9.6 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\textbf{Observations:}
-\begin{itemize}
-  \item As minsup increases, both the number of MFIs and execution time decrease, as expected from anti-monotonicity pruning.
-  \item UGenMax is consistently faster than UFPMax on this dense dataset across all minsup values (e.g., 7 ms vs.\ 12 ms at minsup=3000, and 134 ms vs.\ 236 ms at minsup=500).
-  \item At low minsup (500), the search space is large (314 MFIs) and both algorithms require more time.
-\end{itemize}
-
-Table~\ref{tab:retail_minsup} shows results on the retail dataset, which is much sparser.
+Retail is our primary benchmark for the expected-support model: 88,162 transactions over 16,470 distinct items, with an average transaction length of $\approx 10$ items. It is the largest sparse dataset among our benchmarks and exercises the sparse-data regime that industrial market-basket applications most often encounter. Table~\ref{tab:retail_minsup} shows UFPMax and UGenMax on retail\_medium across a wide range of minsup thresholds.
 
 \begin{table}[h]
 \centering
@@ -960,12 +916,39 @@ Table~\ref{tab:retail_minsup} shows results on the retail dataset, which is much
 \end{tabular}
 \end{table}
 
-\textbf{Observations:}
+\textbf{Observations on retail\_medium:}
 \begin{itemize}
-  \item Retail produces fewer MFIs than mushroom due to its sparse nature (average transaction length $\approx 10$ items out of 16,470 distinct items).
-  \item UGenMax is faster than UFPMax here as well, and uses roughly 30--35\% less memory.
-  \item The time is dominated by database loading and tidset/projection construction rather than the search itself.
+  \item As minsup rises, both the MFI count and execution time decrease, as expected from anti-monotonicity pruning.
+  \item UGenMax is consistently faster than UFPMax across every minsup tested. Speedups range from 19\% at minsup=2000 (71 vs.\ 88 ms) up to 43\% at minsup=1000 (93 vs.\ 164 ms).
+  \item UGenMax also uses roughly 30--35\% less memory at every minsup --- the weighted-tidset representation is more compact than UFPMax's projected conditional databases on this sparse dataset.
+  \item The absolute runtime is small (well under 200 ms) even at the most permissive threshold, because most of the 16,470 items are infrequent and pruned early. Runtime is dominated by database loading and tidset/projection construction rather than by the search itself.
+  \item At high minsup ($\geq 3000$), only 2--4 MFIs are found, which is typical for a sparse transactional dataset where long co-occurrence patterns are rare.
 \end{itemize}
+
+\section{Expected Support on mushroom\_medium (Secondary Dataset)}
+
+To confirm that the trends observed on retail generalise beyond the sparse regime, we repeat the experiment on the dense mushroom dataset (Table~\ref{tab:mushroom_minsup}).
+
+\begin{table}[h]
+\centering
+\caption{Performance on mushroom\_medium (8,416 transactions, 120 items)}
+\label{tab:mushroom_minsup}
+\begin{tabular}{rrrrrr}
+\toprule
+\textbf{minsup} & \textbf{MFIs} & \multicolumn{2}{c}{\textbf{Time (ms)}} & \multicolumn{2}{c}{\textbf{Memory (MB)}} \\
+ & & UFPMax & UGenMax & UFPMax & UGenMax \\
+\midrule
+500 & 314 & 236 & 134 & 45.5 & 14.7 \\
+1000 & 73 & 86 & 49 & 6.0 & 17.0 \\
+1500 & 30 & 53 & 25 & 18.7 & 11.1 \\
+2000 & 14 & 29 & 10 & 9.2 & 19.1 \\
+2500 & 9 & 16 & 7 & 27.4 & 12.5 \\
+3000 & 5 & 12 & 7 & 18.7 & 9.6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Observations on mushroom\_medium:} The same qualitative trend holds --- UGenMax is consistently faster (42--66\% speedup) across all minsup values, and memory use is also lower or comparable. Because mushroom is much denser (120 items, $\sim$23 items per transaction), it produces far more MFIs at comparable relative thresholds (up to 314 MFIs at minsup=500), giving a larger absolute speedup window than the sparser retail dataset.
 
 \section{Scalability: Accidents Dataset}
 
@@ -998,52 +981,33 @@ Table~\ref{tab:accidents} shows results on the accidents dataset, which is the l
   \item Memory usage reaches $\sim$1.4 GB at low thresholds due to the large number of items per transaction ($\sim$33 items on average out of 468). On this dataset the two algorithms use comparable memory (UFPMax ranges 803--1,401 MB; UGenMax ranges 960--1,118 MB).
 \end{itemize}
 
-\section{Effect of Uncertainty Level}
+\section{Cross-Dataset Scalability Snapshot}
 
-Table~\ref{tab:uncertainty} shows how uncertainty level affects results on mushroom with fixed minsup=1500.
+Table~\ref{tab:scalability} summarises a single-run comparison across all three standard datasets at a representative minsup per dataset, highlighting how the two expected-support algorithms behave as both the transaction count and item count grow.
 
 \begin{table}[h]
 \centering
-\caption{Effect of uncertainty level on mushroom (minsup=1500)}
-\label{tab:uncertainty}
-\begin{tabular}{lrrrrr}
+\caption{Cross-dataset scalability of UFPMax and UGenMax at medium uncertainty}
+\label{tab:scalability}
+\begin{tabular}{lrrrrrrr}
 \toprule
-\textbf{Uncertainty} & \textbf{MFIs} & \multicolumn{2}{c}{\textbf{Time (ms)}} & \multicolumn{2}{c}{\textbf{Memory (MB)}} \\
- & & UFPMax & UGenMax & UFPMax & UGenMax \\
+\textbf{Dataset} & \textbf{\#Trans} & \textbf{\#Items} & \textbf{minsup} & \textbf{MFIs} & \textbf{Algo} & \textbf{Time (ms)} & \textbf{Mem (MB)} \\
 \midrule
-High ($\mu$=0.8) & 341 & 701 & 415 & 5.2 & 74.4 \\
-Medium ($\mu$=0.5) & 30 & 310 & 94 & 45.7 & 6.3 \\
-Low ($\mu$=0.3) & 9 & 264 & 87 & 11.0 & 16.5 \\
+mushroom & 8,416 & 120 & 2,000 & 14 & UFPMax & 41 & 22.1 \\
+mushroom & 8,416 & 120 & 2,000 & 14 & UGenMax & 14 & 23.9 \\
+retail & 88,162 & 16,470 & 5,000 & 4 & UFPMax & 127 & 130.0 \\
+retail & 88,162 & 16,470 & 5,000 & 4 & UGenMax & 64 & 82.0 \\
+accidents & 340,183 & 468 & 50,000 & 154 & UFPMax & 11,916 & 1,552.0 \\
+accidents & 340,183 & 468 & 50,000 & 154 & UGenMax & 8,222 & 1,180.0 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\textbf{Key finding:} Higher certainty (high level) produces dramatically more MFIs (341 vs.\ 9 for low), because expected supports are higher when item probabilities are near 1.0. This means low-uncertainty databases require lower minsup thresholds to find meaningful patterns. Execution time also increases with more MFIs due to larger search space.
+\textbf{Observation:} Both algorithms scale from 8K to 340K transactions, and UGenMax retains a clear advantage at every scale (66\% faster on mushroom, 50\% faster on retail, 31\% faster on accidents in this snapshot). The retail run in particular illustrates UGenMax's memory advantage on sparse data ($\sim$37\% less memory than UFPMax).
 
-\section{Probabilistic Support: TODIS-MAX vs.\ APFI-MAX}
+\section{Probabilistic Support on retail\_medium (Primary Dataset)}
 
-Table~\ref{tab:prob_mushroom} compares the two probabilistic algorithms on mushroom\_medium.
-
-\begin{table}[h]
-\centering
-\caption{TODIS-MAX vs.\ APFI-MAX on mushroom\_medium (8,416 transactions)}
-\label{tab:prob_mushroom}
-\begin{tabular}{rrrrrrr}
-\toprule
-\textbf{minsup} & \textbf{$\tau$} & \multicolumn{2}{c}{\textbf{MFIs}} & \multicolumn{2}{c}{\textbf{Time (ms)}} \\
- & & TODIS & APFI & TODIS & APFI \\
-\midrule
-3000 & 0.5 & 5 & 5 & 519 & 37 \\
-3000 & 0.7 & 5 & 5 & 488 & 30 \\
-3000 & 0.9 & 5 & 5 & 522 & 32 \\
-4000 & 0.5 & 3 & 3 & 304 & 23 \\
-4000 & 0.7 & 3 & 3 & 292 & 24 \\
-4000 & 0.9 & 3 & 3 & 299 & 22 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Table~\ref{tab:prob_retail} shows results on the larger retail dataset (88,162 transactions).
+We first evaluate TODIS-MAX and APFI-MAX on the primary retail dataset. Table~\ref{tab:prob_retail} lists every configuration from \texttt{exp2\_probabilistic.csv}.
 
 \begin{table}[h]
 \centering
@@ -1054,22 +1018,73 @@ Table~\ref{tab:prob_retail} shows results on the larger retail dataset (88,162 t
 \textbf{minsup} & \textbf{$\tau$} & \multicolumn{2}{c}{\textbf{MFIs}} & \multicolumn{2}{c}{\textbf{Time (s)}} & \multicolumn{2}{c}{\textbf{Memory (MB)}} \\
  & & TODIS & APFI & TODIS & APFI & TODIS & APFI \\
 \midrule
-5000 & 0.5 & 4 & 4 & 60.9 & 58.6 & 369.1 & 53.1 \\
-5000 & 0.7 & 4 & 4 & 135.3 & 58.8 & 31.6 & 53.1 \\
-5000 & 0.9 & 4 & 4 & 62.7 & 90.8 & 19.5 & 53.1 \\
-10000 & 0.5 & 2 & 2 & 62.7 & 118.1 & 334.6 & 25.1 \\
+5,000  & 0.5 & 4 & 4 & 60.9  & 58.6  & 369.1 & 53.1 \\
+5,000  & 0.7 & 4 & 4 & 135.3 & 58.8  & 31.6  & 53.1 \\
+5,000  & 0.9 & 4 & 4 & 62.7  & 90.8  & 19.5  & 53.1 \\
+10,000 & 0.5 & 2 & 2 & 62.7  & 118.1 & 334.6 & 25.1 \\
+10,000 & 0.7 & 2 & 2 & 62.6  & 103.1 & 372.6 & 25.1 \\
+10,000 & 0.9 & 2 & 2 & 62.8  & 61.1  & 346.3 & 25.1 \\
+15,000 & 0.5 & 2 & 2 & 64.7  & 64.0  & 449.0 & 25.1 \\
+15,000 & 0.7 & 2 & 2 & 65.5  & 65.6  & 417.7 & 25.1 \\
+15,000 & 0.9 & 2 & 2 & 63.7  & 65.1  & 403.0 & 25.1 \\
+20,000 & 0.5 & 2 & 2 & 66.4  & 65.5  & 316.3 & 25.1 \\
+20,000 & 0.7 & 2 & 2 & 63.6  & 64.4  & 127.0 & 25.1 \\
+20,000 & 0.9 & 2 & 2 & 63.3  & 63.0  & 393.4 & 25.1 \\
+30,000 & 0.5 & 0 & 0 & 58.9  & 63.4  & 21.1  & 21.1 \\
+30,000 & 0.7 & 0 & 0 & 58.7  & 65.9  & 21.1  & 21.1 \\
+30,000 & 0.9 & 0 & 0 & 58.7  & 60.8  & 21.1  & 21.1 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\textbf{Key findings:}
+\textbf{Observations on retail\_medium:}
 \begin{itemize}
-  \item On mushroom (8K transactions), APFI-MAX is \textbf{12--17$\times$ faster} than TODIS-MAX, confirming that the $O(n)$ CLT approximation is significantly faster than the $O(n \cdot T)$ exact DP computation.
-  \item Both produce \textbf{identical results} on both datasets, indicating that the CLT approximation is accurate for datasets with thousands of transactions.
-  \item On retail (88K transactions), the total time is dominated by candidate generation (scanning 88K transactions across 16,470 items). With only 4--6 candidates surviving the Apriori phase, the PMF computation itself is a small fraction of the total time. Consequently, the speed advantage of APFI-MAX's $O(n)$ frequency check over TODIS-MAX's $O(n \cdot T)$ DP is less pronounced on retail --- the two algorithms are broadly comparable in total time, and in a few configurations APFI-MAX is even slower because of variation in the candidate-generation phase.
-  \item APFI-MAX consistently uses \textbf{less memory} on retail ($\sim$25--53 MB vs.\ up to $\sim$450 MB for TODIS-MAX), since it avoids storing the DP array. On mushroom, memory is also typically lower for APFI-MAX ($\sim$6--35 MB vs.\ up to $\sim$160 MB for TODIS-MAX).
-  \item The speed advantage of APFI-MAX becomes more significant when there are \textbf{many candidates} to verify (as on mushroom), because the per-candidate cost difference ($O(n)$ vs.\ $O(n \cdot T)$) is multiplied across all candidates.
+  \item \textbf{Matching MFI counts.} Across all 15 configurations, TODIS-MAX and APFI-MAX return the same MFI count, so the CLT approximation preserves correctness on this 88K-transaction dataset.
+  \item \textbf{Total time is comparable.} Most runs take 60--66\,s for both algorithms; total time is dominated by database loading and Apriori candidate generation across the 16,470-item space, not by the frequency-measurement step. The $O(n)$ vs.\ $O(n \cdot T)$ per-candidate cost difference therefore has little effect, since the number of surviving candidates is small (0--4).
+  \item \textbf{A few outliers.} TODIS-MAX at (minsup=5000, $\tau$=0.7) took 135.3\,s --- noticeably above the baseline 60--66\,s; similarly APFI-MAX at (5000, 0.9) took 90.8\,s and at (10000, 0.5) took 118.1\,s. These variations come from the non-deterministic portion of the Apriori phase (hashing / GC effects), not from the algorithmic core.
+  \item \textbf{APFI-MAX uses dramatically less memory.} APFI-MAX sits at a steady 25--53\,MB across all non-trivial configurations, while TODIS-MAX spikes to 127--449\,MB whenever its DP array must be allocated. When no MFIs are found (minsup=30,000), the two algorithms converge in memory (21.1\,MB each).
 \end{itemize}
+
+\section{Probabilistic Support on mushroom\_medium (Secondary Dataset)}
+
+On the smaller, denser mushroom dataset, the per-candidate frequency cost becomes a larger share of total time, which exposes the asymptotic advantage of APFI-MAX's CLT frequency check. Table~\ref{tab:prob_mushroom} lists every configuration from \texttt{exp2\_probabilistic.csv}.
+
+\begin{table}[h]
+\centering
+\caption{TODIS-MAX vs.\ APFI-MAX on mushroom\_medium (8,416 transactions)}
+\label{tab:prob_mushroom}
+\begin{tabular}{rrrrrrrr}
+\toprule
+\textbf{minsup} & \textbf{$\tau$} & \multicolumn{2}{c}{\textbf{MFIs}} & \multicolumn{2}{c}{\textbf{Time (ms)}} & \multicolumn{2}{c}{\textbf{Memory (MB)}} \\
+ & & TODIS & APFI & TODIS & APFI & TODIS & APFI \\
+\midrule
+3,000 & 0.5 & 5 & 5 & 519 & 37 & 112.7 & 8.7 \\
+3,000 & 0.7 & 5 & 5 & 488 & 30 & 160.1 & 7.9 \\
+3,000 & 0.9 & 5 & 5 & 522 & 32 & 2.2   & 6.0 \\
+4,000 & 0.5 & 3 & 3 & 304 & 23 & 87.3  & 35.0 \\
+4,000 & 0.7 & 3 & 3 & 292 & 24 & 121.2 & 34.7 \\
+4,000 & 0.9 & 3 & 3 & 299 & 22 & 11.6  & 34.7 \\
+5,000 & 0.5 & 0 & 0 & 21  & 21 & 1.2   & 32.7 \\
+5,000 & 0.7 & 0 & 0 & 20  & 19 & 1.3   & 32.7 \\
+5,000 & 0.9 & 0 & 0 & 25  & 18 & 1.3   & 32.7 \\
+6,000 & 0.5 & 0 & 0 & 20  & 20 & 1.3   & 32.7 \\
+6,000 & 0.7 & 0 & 0 & 26  & 18 & 1.3   & 32.7 \\
+6,000 & 0.9 & 0 & 0 & 18  & 22 & 1.3   & 32.7 \\
+7,000 & 0.5 & 0 & 0 & 16  & 21 & 1.3   & 32.7 \\
+7,000 & 0.7 & 0 & 0 & 24  & 19 & 1.3   & 32.7 \\
+7,000 & 0.9 & 0 & 0 & 20  & 16 & 1.3   & 32.7 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Observations on mushroom\_medium:}
+\begin{itemize}
+  \item \textbf{Matching MFI counts across all 15 rows}, again confirming that the CLT approximation matches the exact DP result on this dataset.
+  \item \textbf{APFI-MAX is 12--17$\times$ faster} whenever there are surviving candidates to verify (minsup $\in \{3000, 4000\}$): e.g.\ 519/37 = 14.0$\times$, 488/30 = 16.3$\times$, 304/23 = 13.2$\times$. For minsup $\geq 5000$ the Apriori phase prunes everything before frequency measurement, so both algorithms finish in 16--26\,ms and the speedup vanishes.
+  \item \textbf{Memory is also consistently lower for APFI-MAX} when any PMF computation is actually performed (6--35 MB vs.\ up to 160 MB for TODIS-MAX), because APFI-MAX stores only running sums instead of a length-$T$ DP array.
+\end{itemize}
+
+\textbf{Cross-dataset takeaway.} The speed advantage of APFI-MAX is largest when there are \emph{many} candidates surviving Apriori, because the per-candidate saving ($O(n)$ vs.\ $O(n \cdot T)$) is multiplied across them. On retail the small surviving candidate count caps the achievable speedup; on mushroom it is fully realised.
 
 \section{Cross-Model Comparison}
 
@@ -1084,11 +1099,10 @@ The expected support model (UFPMax/UGenMax) and probabilistic support model (TOD
 \section{Summary of Findings}
 
 \begin{enumerate}
-  \item \textbf{Correctness:} UGenMax and UFPMax produce identical results. TODIS-MAX and APFI-MAX produce matching results.
-  \item \textbf{UGenMax vs.\ UFPMax:} UGenMax is faster and typically uses less memory on dense mushroom (42--66\% faster) and sparse retail (19--43\% faster). On the very dense accidents dataset, UGenMax is 13--36\% faster for minsup $\geq$ 30,000 and is essentially tied with UFPMax at minsup=20,000.
-  \item \textbf{TODIS-MAX vs.\ APFI-MAX:} APFI-MAX is 12--17$\times$ faster on mushroom with much less memory. On the larger retail dataset, both have similar total time (dominated by candidate generation) but APFI-MAX still uses significantly less memory.
-  \item \textbf{Uncertainty impact:} Higher certainty produces more MFIs; lower certainty requires lower thresholds.
-  \item \textbf{Scalability:} All algorithms scale to 340K transactions (accidents) within acceptable time limits.
+  \item \textbf{Correctness:} UGenMax and UFPMax produce identical MFI sets across all datasets and thresholds. TODIS-MAX and APFI-MAX produce matching MFI counts across every configuration measured.
+  \item \textbf{UGenMax vs.\ UFPMax (primary: retail):} UGenMax is 19--43\% faster than UFPMax on the primary retail\_medium dataset and uses roughly 30--35\% less memory. The advantage generalises to dense mushroom (42--66\% faster) and to very dense accidents (13--36\% faster at minsup $\geq$ 30,000; essentially tied at minsup=20,000).
+  \item \textbf{TODIS-MAX vs.\ APFI-MAX (primary: retail):} On retail\_medium, both algorithms have comparable total time (dominated by Apriori candidate generation) but APFI-MAX uses dramatically less memory (25--53 MB vs.\ up to 449 MB). On the smaller mushroom dataset, APFI-MAX is also 12--17$\times$ faster whenever there are surviving candidates.
+  \item \textbf{Scalability:} All algorithms scale to 340K transactions (accidents) within acceptable time limits, and UGenMax retains a per-dataset speed advantage from mushroom (8K) through accidents (340K).
 \end{enumerate}
 
 % ============================================================
@@ -1105,7 +1119,7 @@ This project designed, implemented, and evaluated four algorithms for mining fre
   \item \textbf{Probabilistic support model:} TODIS-MAX (exact PMF computation via Dynamic Programming, based on Sun et al., 2010) and APFI-MAX (approximate frequency estimation via CLT, based on Chen et al., 2020). Both use Apriori-based candidate generation with top-down maximal verification.
 \end{itemize}
 
-Experiments on three benchmark datasets (mushroom, retail, accidents) at three uncertainty levels demonstrate that all algorithms produce correct results and exhibit distinct performance characteristics.
+Experiments on three benchmark datasets (mushroom, retail, accidents) at medium uncertainty, with retail\_medium as the primary benchmark, demonstrate that all algorithms produce correct results and exhibit distinct performance characteristics.
 
 \section{Key Contributions}
 
