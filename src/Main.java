@@ -1,10 +1,7 @@
 import model.UncertainDatabase;
 import model.Itemset;
-import model.TopKHeap;
 import algorithm.UFPMax;
 import algorithm.UGenMax;
-import algorithm.TODISMAX;
-import algorithm.APFIMAX;
 import util.PerformanceTracker;
 
 import java.util.List;
@@ -15,23 +12,16 @@ import java.io.IOException;
 /**
  * Main entry point for the Frequent Maximal Itemset Mining program.
  *
- * Supports four algorithms for mining frequent maximal itemsets
- * from uncertain transaction databases:
+ * Supports two algorithms for mining frequent maximal itemsets
+ * from uncertain transaction databases under the expected support model:
  *
- *   Expected support model (old):
- *     UFPMax  — FPMax adapted for uncertain data (2004)
- *     UGenMax — GenMax adapted for uncertain data (2005)
+ *   UFPMax  — FPMax adapted for uncertain data (2004)
+ *   UGenMax — GenMax adapted for uncertain data (2005)
  *
- *   Probabilistic support model (new):
- *     TODISMAX — Exact probabilistic mining via DP (Sun et al., 2010)
- *     APFIMAX — Approximate probabilistic mining via CLT (Chen et al., 2020)
+ * Both algorithms support static minsup mode and Top-K mode.
  *
  * Usage:
- *   # Expected support algorithms:
  *   java Main -algorithm <UFPMax|UGenMax> -input <file> -output <file> [-minsup <value> | -topk <value>]
- *
- *   # Probabilistic support algorithms:
- *   java Main -algorithm <TODISMAX|APFIMAX> -input <file> -output <file> -minsup <int> -minprob <value>
  *
  * @author Mã Quốc Cường, Nguyễn Cao Phi
  */
@@ -43,7 +33,6 @@ public class Main {
         String inputFile = null;
         String outputFile = null;
         double minsup = -1;
-        double minprob = -1;
         int topK = -1;
 
         for (int i = 0; i < args.length; i++) {
@@ -59,9 +48,6 @@ public class Main {
                     break;
                 case "-minsup":
                     minsup = Double.parseDouble(args[++i]);
-                    break;
-                case "-minprob":
-                    minprob = Double.parseDouble(args[++i]);
                     break;
                 case "-topk":
                     topK = Integer.parseInt(args[++i]);
@@ -80,26 +66,15 @@ public class Main {
             return;
         }
 
-        String algoUpper = algorithm.toUpperCase();
-        boolean isProbabilistic = algoUpper.equals("TODISMAX") || algoUpper.equals("APFIMAX");
-
-        if (isProbabilistic) {
-            if (minsup < 0 || minprob < 0) {
-                System.err.println("Error: " + algorithm + " requires both -minsup (integer) and -minprob.");
-                printUsage();
-                return;
-            }
-        } else {
-            if (minsup < 0 && topK < 0) {
-                System.err.println("Error: Either -minsup or -topk must be specified.");
-                printUsage();
-                return;
-            }
-            if (minsup >= 0 && topK >= 0) {
-                System.err.println("Error: Cannot specify both -minsup and -topk.");
-                printUsage();
-                return;
-            }
+        if (minsup < 0 && topK < 0) {
+            System.err.println("Error: Either -minsup or -topk must be specified.");
+            printUsage();
+            return;
+        }
+        if (minsup >= 0 && topK >= 0) {
+            System.err.println("Error: Cannot specify both -minsup and -topk.");
+            printUsage();
+            return;
         }
 
         // --- Load database ---
@@ -120,6 +95,7 @@ public class Main {
 
         tracker.start();
 
+        String algoUpper = algorithm.toUpperCase();
         switch (algoUpper) {
             case "UFPMAX": {
                 boolean useTopK = (topK > 0);
@@ -137,23 +113,9 @@ public class Main {
                 results = ugenmax.run();
                 break;
             }
-            case "TODISMAX": {
-                int minsupInt = (int) minsup;
-                System.out.println("Running TODIS-MAX (minsup=" + minsupInt + ", minprob=" + minprob + ")");
-                TODISMAX todismax = new TODISMAX(database, minsupInt, minprob);
-                results = todismax.run();
-                break;
-            }
-            case "APFIMAX": {
-                int minsupInt = (int) minsup;
-                System.out.println("Running APFI-MAX (minsup=" + minsupInt + ", minprob=" + minprob + ")");
-                APFIMAX apfimax = new APFIMAX(database, minsupInt, minprob);
-                results = apfimax.run();
-                break;
-            }
             default:
                 System.err.println("Unknown algorithm: " + algorithm);
-                System.err.println("Supported: UFPMax, UGenMax, TODISMAX, APFIMAX");
+                System.err.println("Supported: UFPMax, UGenMax");
                 return;
         }
 
@@ -165,7 +127,7 @@ public class Main {
         System.out.println("Memory: " + tracker.getMemoryUsageMB() + " MB");
 
         try {
-            writeResults(results, outputFile, isProbabilistic);
+            writeResults(results, outputFile);
             System.out.println("Results written to: " + outputFile);
         } catch (IOException e) {
             System.err.println("Error writing output file: " + e.getMessage());
@@ -173,23 +135,17 @@ public class Main {
     }
 
     /**
-     * Writes results in SPMF-compatible format.
-     * For expected support algorithms: item1 item2 ... #SUP: expectedSupport
-     * For probabilistic algorithms:    item1 item2 ... #SUP: P(sup>=minsup)
+     * Writes results in SPMF-compatible format:
+     *   item1 item2 ... #SUP: <expectedSupport>
      */
-    private static void writeResults(List<Itemset> results, String outputFile,
-                                      boolean isProbabilistic) throws IOException {
+    private static void writeResults(List<Itemset> results, String outputFile) throws IOException {
         try (PrintWriter writer = new PrintWriter(new FileWriter(outputFile))) {
             for (Itemset itemset : results) {
                 StringBuilder sb = new StringBuilder();
                 for (int item : itemset.getItems()) {
                     sb.append(item).append(" ");
                 }
-                if (isProbabilistic) {
-                    sb.append("#PROB: ").append(String.format("%.6f", itemset.getExpectedSupport()));
-                } else {
-                    sb.append("#SUP: ").append(String.format("%.4f", itemset.getExpectedSupport()));
-                }
+                sb.append("#SUP: ").append(String.format("%.4f", itemset.getExpectedSupport()));
                 writer.println(sb.toString());
             }
         }
@@ -198,24 +154,17 @@ public class Main {
     private static void printUsage() {
         System.err.println();
         System.err.println("Usage:");
-        System.err.println("  Expected support model:");
-        System.err.println("    java Main -algorithm <UFPMax|UGenMax> -input <file> -output <file> [-minsup <value> | -topk <value>]");
-        System.err.println();
-        System.err.println("  Probabilistic support model:");
-        System.err.println("    java Main -algorithm <TODISMAX|APFIMAX> -input <file> -output <file> -minsup <int> -minprob <value>");
+        System.err.println("  java Main -algorithm <UFPMax|UGenMax> -input <file> -output <file> [-minsup <value> | -topk <value>]");
         System.err.println();
         System.err.println("Options:");
-        System.err.println("  -algorithm   UFPMax, UGenMax, TODISMAX, or APFIMAX");
+        System.err.println("  -algorithm   UFPMax or UGenMax");
         System.err.println("  -input       Path to uncertain transaction database file");
         System.err.println("  -output      Path to output file for results");
-        System.err.println("  -minsup      Support threshold (double for UFPMax/UGenMax, int for TODISMAX/APFIMAX)");
-        System.err.println("  -minprob     Probability threshold for TODISMAX/APFIMAX (e.g., 0.5, 0.9)");
-        System.err.println("  -topk        Top-K mode for UFPMax/UGenMax only");
+        System.err.println("  -minsup      Minimum expected support threshold (double)");
+        System.err.println("  -topk        Top-K mode: keep K itemsets with highest expected support");
         System.err.println();
         System.err.println("Examples:");
-        System.err.println("  java Main -algorithm UFPMax -input data.txt -output result.txt -minsup 1.5");
+        System.err.println("  java Main -algorithm UFPMax  -input data.txt -output result.txt -minsup 1.5");
         System.err.println("  java Main -algorithm UGenMax -input data.txt -output result.txt -topk 10");
-        System.err.println("  java Main -algorithm TODISMAX -input data.txt -output result.txt -minsup 2 -minprob 0.5");
-        System.err.println("  java Main -algorithm APFIMAX -input data.txt -output result.txt -minsup 2 -minprob 0.5");
     }
 }

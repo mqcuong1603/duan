@@ -103,6 +103,11 @@ public class UGenMax {
         }
     }
 
+    /** Returns the current minsup (raised dynamically in Top-K mode after run()). */
+    public double getMinsup() {
+        return minsup;
+    }
+
     /**
      * Runs the UGenMax algorithm and returns the discovered maximal frequent itemsets.
      *

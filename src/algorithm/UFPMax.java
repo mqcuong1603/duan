@@ -116,6 +116,11 @@ public class UFPMax {
         }
     }
 
+    /** Returns the current minsup (raised dynamically in Top-K mode after run()). */
+    public double getMinsup() {
+        return minsup;
+    }
+
     /**
      * Runs the UFPMax algorithm and returns the discovered maximal frequent itemsets.
      *
