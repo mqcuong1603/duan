@@ -665,11 +665,13 @@ Best for & Sparse data & Dense data \\
 
   \section{Configurations}
 
-  \textbf{Static minsup mode (UGenMax, UFPMax):} Vary minsup across appropriate ranges per dataset.
+  \textbf{Static minsup mode (UGenMax, UFPMax).} Vary minsup across an appropriate range per dataset --- a coarse grid of six values chosen so that the MFI count varies from hundreds to single digits. Mushroom uses minsup $\in \{500, 1000, 1500, 2000, 2500, 3000\}$, retail uses $\{1000, 2000, 3000, 5000, 8000, 10000\}$, and accidents uses $\{20000, 30000, 40000, 50000, 60000, 70000\}$. The full grid is recorded in \texttt{results/exp1\_expected\_support.csv}.
 
-  \textbf{Top-K mode (UGenMax, UFPMax):} Vary $K \in \{5, 10, 20, 50, 100\}$ on mushroom\_medium, retail\_medium, and accidents\_medium.
+  \textbf{Top-K mode (UGenMax, UFPMax).} Vary $K \in \{10, 20, 50\}$ on mushroom\_medium, recorded in \texttt{results/exp\_topk.csv} (the \texttt{ExperimentRunner} class also supports $K \in \{5, 100\}$ and the larger retail/accidents datasets, but those runs are out of scope for the headline measurements reported in Chapter~6).
 
-  For each configuration we record: time (ms), memory (MB), number of MFIs, and algorithm-specific statistics (nodes explored, pruning counts, candidates generated).
+  \textbf{Cross-dataset snapshot.} A single representative minsup per dataset (mushroom=2{,}000, retail=5{,}000, accidents=50{,}000) is re-run across all three datasets to compare scalability at one fixed working point, recorded in \texttt{results/exp4\_scalability.csv}.
+
+  For each configuration we record: time (ms), memory (MB), number of MFIs, and algorithm-specific statistics (nodes explored, pruning counts, candidates generated --- emitted by the per-algorithm \texttt{ExpUFPMax} and \texttt{ExpUGenMax} runners, which is where the ``Nodes Explored'' column in Table~\ref{tab:topk} originates).
 
   \section{Correctness Validation}
 
@@ -677,7 +679,7 @@ Best for & Sparse data & Dense data \\
 
   \section{Performance Measurement}
 
-  PerformanceTracker uses \texttt{System.nanoTime()} for timing and \texttt{Runtime.totalMemory() - Runtime.freeMemory()} for memory, with GC forced before each run. Each expected support experiment is averaged over 3 measured runs after 1 warm-up run.
+  PerformanceTracker uses \texttt{System.nanoTime()} for timing and \texttt{Runtime.totalMemory() - Runtime.freeMemory()} for memory, with GC forced before each measured run. The full benchmark suite (\texttt{ExperimentRunner}) averages each (dataset, algorithm, parameter) cell over 3 measured runs after 1 warm-up run, for both the static-minsup grid and the Top-K grid. The cross-dataset and uncertainty-level snapshots are single-run measurements --- their purpose is to show qualitative scaling, not to claim tight error bars. All CSVs emitted by the runner live under \texttt{results/} and are the sole source for every table and chart in Chapter~6.
 
 % ============================================================
 % CHAPTER 6: EXPERIMENT RESULTS
@@ -927,7 +929,7 @@ Best for & Sparse data & Dense data \\
 
   \section{Top-K Mode}
 
-Table~\ref{tab:topk} compares UGenMax and UFPMax in Top-K mode on mushroom\_medium. Both UGenMax and UFPMax support Top-K mode.
+Top-K mode is the practitioner-friendly setting: instead of guessing a minsup threshold, the user simply asks for the $K$ highest-support MFIs. Table~\ref{tab:topk} compares UGenMax and UFPMax on mushroom\_medium across $K \in \{10, 20, 50\}$. The time and memory columns are averaged over the same 3-run measurement protocol as the static-minsup experiments; the ``Nodes Explored'' and ``Final minsup'' columns come from the per-algorithm \texttt{ExpUFPMax}/\texttt{ExpUGenMax} runners (which emit those internal counters) rather than from the bulk CSV.
 
 \begin{table}[h]
 \centering
