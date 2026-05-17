@@ -190,7 +190,7 @@
 
   \textbf{UGenMax} adapts GenMax (Gouda and Zaki, 2005) using bottom-up weighted tidset intersections, and \textbf{UFPMax} adapts FPMax (Grahne and Zhu, 2003) using top-down conditional database projection. Both employ branch-and-bound search with anti-monotonicity pruning, progressive focusing, and dynamic Top-K threshold raising, and both support a Top-K mode.
 
-  Both algorithms are implemented in pure Java SE with no external dependencies, following object-oriented design principles with separate algorithm classes (no main method) and experiment classes (with main method and statistics output). Experiments on three benchmark datasets (mushroom, retail, accidents) at medium uncertainty show that: (1) UGenMax and UFPMax produce identical results, with UGenMax being 19--43\% faster on the primary retail dataset, 42--66\% faster on mushroom, and 13--36\% faster on accidents at moderate/high thresholds; (2) both algorithms scale to 340K transactions.
+  Both algorithms are implemented in pure Java SE with no external dependencies, following object-oriented design principles with separate algorithm classes (no main method) and experiment classes (with main method and statistics output). Experiments on three benchmark datasets (mushroom, retail, accidents) at medium uncertainty show that: (1) UGenMax and UFPMax produce identical results, with UGenMax being 16--33\% faster on the primary retail dataset, 37--47\% faster on mushroom at non-trivial workloads, and 14--49\% faster on accidents across the full minsup range; (2) both algorithms scale to 340K transactions, and UGenMax is 3--30$\times$ faster in Top-K mode.
 
   \pagebreak
 
@@ -701,17 +701,17 @@ Best for & Sparse data & Dense data \\
       \textbf{minsup} & \textbf{MFIs} & \multicolumn{2}{c}{\textbf{Time (ms)}} & \multicolumn{2}{c}{\textbf{Memory (MB)}} \\
       & & UFPMax & UGenMax & UFPMax & UGenMax \\
       \midrule
-      1000 & 18 & 164 & 93 & 90.3 & 67.0 \\
-      2000 & 6 & 88 & 71 & 102.0 & 64.0 \\
-      3000 & 4 & 82 & 60 & 100.0 & 62.0 \\
-      5000 & 4 & 86 & 65 & 100.0 & 62.0 \\
-      8000 & 2 & 75 & 58 & 91.0 & 59.0 \\
-      10000 & 2 & 72 & 56 & 91.0 & 59.0 \\
+      1000 & 18 & 151 & 102 & 96.0 & 67.0 \\
+      2000 & 6 & 91 & 73 & 104.0 & 64.0 \\
+      3000 & 4 & 89 & 67 & 100.0 & 62.0 \\
+      5000 & 4 & 89 & 69 & 100.0 & 62.0 \\
+      8000 & 2 & 77 & 56 & 91.0 & 59.0 \\
+      10000 & 2 & 73 & 61 & 91.0 & 59.0 \\
       \bottomrule
     \end{tabular}
   \end{table}
 
-  \textbf{Observations on retail\_medium.} As minsup rises, both the MFI count and execution time decrease, consistent with anti-monotonicity pruning. UGenMax is faster than UFPMax at every minsup tested, with speedups ranging from 19\% at minsup=2000 (71 vs.\ 88 ms) up to 43\% at minsup=1000 (93 vs.\ 164 ms), and it uses roughly 30--35\% less memory because the weighted-tidset representation is more compact than UFPMax's projected conditional databases on this sparse dataset. Absolute runtime stays well under 200 ms even at the most permissive threshold, because most of the 16,470 items are infrequent and pruned early --- the cost is dominated by database loading and tidset/projection construction rather than by the search itself. At high minsup ($\geq 3000$) only 2--4 MFIs are found, which is typical for a sparse transactional dataset where long co-occurrence patterns are rare.
+  \textbf{Observations on retail\_medium.} As minsup rises, both the MFI count and execution time decrease, consistent with anti-monotonicity pruning. UGenMax is faster than UFPMax at every minsup tested, with speedups ranging from 16\% at minsup=10000 (61 vs.\ 73 ms) up to 33\% at minsup=1000 (102 vs.\ 151 ms), and it uses roughly 30--38\% less memory because the weighted-tidset representation is more compact than UFPMax's projected conditional databases on this sparse dataset. Absolute runtime stays well under 200 ms even at the most permissive threshold, because most of the 16,470 items are infrequent and pruned early --- the cost is dominated by database loading and tidset/projection construction rather than by the search itself. At high minsup ($\geq 3000$) only 2--4 MFIs are found, which is typical for a sparse transactional dataset where long co-occurrence patterns are rare.
 
   \begin{figure}[h]
     \centering
@@ -733,10 +733,10 @@ Best for & Sparse data & Dense data \\
         thick,
       ]
         \addplot[color=blue, mark=square*] coordinates {
-          (1000,164) (2000,88) (3000,82) (5000,86) (8000,75) (10000,72)
+          (1000,151) (2000,91) (3000,89) (5000,89) (8000,77) (10000,73)
         };
         \addplot[color=red, mark=triangle*] coordinates {
-          (1000,93) (2000,71) (3000,60) (5000,65) (8000,58) (10000,56)
+          (1000,102) (2000,73) (3000,67) (5000,69) (8000,56) (10000,61)
         };
         \legend{UFPMax, UGenMax}
       \end{axis}
@@ -758,17 +758,17 @@ Best for & Sparse data & Dense data \\
       \textbf{minsup} & \textbf{MFIs} & \multicolumn{2}{c}{\textbf{Time (ms)}} & \multicolumn{2}{c}{\textbf{Memory (MB)}} \\
       & & UFPMax & UGenMax & UFPMax & UGenMax \\
       \midrule
-      500 & 314 & 236 & 134 & 45.5 & 14.7 \\
-      1000 & 73 & 86 & 49 & 6.0 & 17.0 \\
-      1500 & 30 & 53 & 25 & 18.7 & 11.1 \\
-      2000 & 14 & 29 & 10 & 9.2 & 19.1 \\
-      2500 & 9 & 16 & 7 & 27.4 & 12.5 \\
-      3000 & 5 & 12 & 7 & 18.7 & 9.6 \\
+      500 & 314 & 223 & 137 & 77.3 & 48.6 \\
+      1000 & 73 & 88 & 47 & 16.8 & 33.5 \\
+      1500 & 30 & 51 & 32 & 28.9 & 12.4 \\
+      2000 & 14 & 28 & 15 & 9.1 & 19.0 \\
+      2500 & 9 & 21 & 12 & 27.4 & 12.5 \\
+      3000 & 5 & 12 & 12 & 18.7 & 9.4 \\
       \bottomrule
     \end{tabular}
   \end{table}
 
-  \textbf{Observations on mushroom\_medium:} The same qualitative trend holds --- UGenMax is consistently faster (42--66\% speedup) across all minsup values, and memory use is also lower or comparable. Because mushroom is much denser (120 items, $\sim$23 items per transaction), it produces far more MFIs at comparable relative thresholds (up to 314 MFIs at minsup=500), giving a larger absolute speedup window than the sparser retail dataset.
+  \textbf{Observations on mushroom\_medium:} The same qualitative trend holds --- UGenMax is faster than UFPMax at every minsup with a non-trivial workload (37--47\% speedup at minsup~$\leq$~2500), with the two algorithms tying at minsup=3000 where the work is so small (5 MFIs, 12 ms) that constant-time overhead dominates. Memory use is also generally lower or comparable. Because mushroom is much denser (120 items, $\sim$23 items per transaction), it produces far more MFIs at comparable relative thresholds (up to 314 MFIs at minsup=500), giving a larger absolute speedup window than the sparser retail dataset.
 
   \begin{figure}[h]
     \centering
@@ -790,10 +790,10 @@ Best for & Sparse data & Dense data \\
         thick,
       ]
         \addplot[color=blue, mark=square*] coordinates {
-          (500,236) (1000,86) (1500,53) (2000,29) (2500,16) (3000,12)
+          (500,223) (1000,88) (1500,51) (2000,28) (2500,21) (3000,12)
         };
         \addplot[color=red, mark=triangle*] coordinates {
-          (500,134) (1000,49) (1500,25) (2000,10) (2500,7) (3000,7)
+          (500,137) (1000,47) (1500,32) (2000,15) (2500,12) (3000,12)
         };
         \legend{UFPMax, UGenMax}
       \end{axis}
@@ -815,17 +815,17 @@ Best for & Sparse data & Dense data \\
       \textbf{minsup} & \textbf{MFIs} & \multicolumn{2}{c}{\textbf{Time (s)}} & \multicolumn{2}{c}{\textbf{Memory (MB)}} \\
       & & UFPMax & UGenMax & UFPMax & UGenMax \\
       \midrule
-      20,000 & 1,285 & 47.4 & 48.8 & 1,400.7 & 1,023.8 \\
-      30,000 & 453 & 23.2 & 20.2 & 991.9 & 1,060.9 \\
-      40,000 & 236 & 14.1 & 10.7 & 803.0 & 1,118.3 \\
-      50,000 & 154 & 9.1 & 6.6 & 1,105.0 & 959.5 \\
-      60,000 & 87 & 6.1 & 4.2 & 917.3 & 988.8 \\
-      70,000 & 48 & 4.2 & 2.7 & 872.0 & 1,095.3 \\
+      20,000 & 1,285 & 126.4 & 109.1 & 761.2 & 1,103.8 \\
+      30,000 & 453 & 61.5 & 46.5 & 1,190.6 & 782.4 \\
+      40,000 & 236 & 38.3 & 24.8 & 912.5 & 1,041.6 \\
+      50,000 & 154 & 24.7 & 14.8 & 717.2 & 1,511.8 \\
+      60,000 & 87 & 16.5 & 9.4 & 937.3 & 1,158.6 \\
+      70,000 & 48 & 11.7 & 6.0 & 899.3 & 1,332.1 \\
       \bottomrule
     \end{tabular}
   \end{table}
 
-  \textbf{Observations.} Both algorithms scale to 340K transactions, returning results in seconds to tens of seconds. UGenMax is 13--36\% faster than UFPMax at minsup $\geq$ 30,000 on this very dense dataset; at the lowest threshold (minsup=20,000) the two algorithms are essentially tied (UGenMax is marginally slower, 48.8 s vs.\ 47.4 s), because the very large result set of 1,285 MFIs erases most of the progressive-focusing advantage. That the search at minsup=20,000 still completes in under a minute while producing 1,285 MFIs shows that both algorithms handle large result sets effectively. Memory usage reaches $\sim$1.4 GB at low thresholds due to the large number of items per transaction ($\sim$33 items on average out of 468); here UFPMax and UGenMax use comparable memory (803--1,401 MB and 960--1,118 MB respectively).
+  \textbf{Observations.} Both algorithms scale to 340K transactions, returning results in tens of seconds to a couple of minutes. UGenMax is consistently faster than UFPMax across the entire minsup range on this very dense dataset, with speedups growing from 14\% at minsup=20,000 (109.1 s vs.\ 126.4 s) up to 49\% at minsup=70,000 (6.0 s vs.\ 11.7 s) as the result set shrinks and progressive focusing becomes more effective. That the search at minsup=20,000 still completes in roughly two minutes while producing 1,285 MFIs shows that both algorithms handle large result sets effectively. Memory usage varies between $\sim$700 MB and $\sim$1.5 GB due to the large number of items per transaction ($\sim$33 items on average out of 468); on this very dense dataset UGenMax's weighted tidsets are not always smaller than UFPMax's projected databases --- UFPMax uses 717--1,191 MB and UGenMax uses 782--1,512 MB, a reversal of the memory advantage observed on sparse retail. This is consistent with the fact that weighted tidsets become large when most transactions contain most items.
 
   \begin{figure}[h]
     \centering
@@ -847,10 +847,10 @@ Best for & Sparse data & Dense data \\
         thick,
       ]
         \addplot[color=blue, mark=square*] coordinates {
-          (20000,47.4) (30000,23.2) (40000,14.1) (50000,9.1) (60000,6.1) (70000,4.2)
+          (20000,126.4) (30000,61.5) (40000,38.3) (50000,24.7) (60000,16.5) (70000,11.7)
         };
         \addplot[color=red, mark=triangle*] coordinates {
-          (20000,48.8) (30000,20.2) (40000,10.7) (50000,6.6) (60000,4.2) (70000,2.7)
+          (20000,109.1) (30000,46.5) (40000,24.8) (50000,14.8) (60000,9.4) (70000,6.0)
         };
         \legend{UFPMax, UGenMax}
       \end{axis}
@@ -871,17 +871,17 @@ Best for & Sparse data & Dense data \\
       \toprule
       \textbf{Dataset} & \textbf{\#Trans} & \textbf{\#Items} & \textbf{minsup} & \textbf{MFIs} & \textbf{Algo} & \textbf{Time (ms)} & \textbf{Mem (MB)} \\
       \midrule
-      mushroom & 8,416 & 120 & 2,000 & 14 & UFPMax & 41 & 22.1 \\
-      mushroom & 8,416 & 120 & 2,000 & 14 & UGenMax & 14 & 23.9 \\
-      retail & 88,162 & 16,470 & 5,000 & 4 & UFPMax & 127 & 130.0 \\
-      retail & 88,162 & 16,470 & 5,000 & 4 & UGenMax & 64 & 82.0 \\
-      accidents & 340,183 & 468 & 50,000 & 154 & UFPMax & 11,916 & 1,552.0 \\
-      accidents & 340,183 & 468 & 50,000 & 154 & UGenMax & 8,222 & 1,180.0 \\
+      mushroom & 8,416 & 120 & 2,000 & 14 & UFPMax & 69 & 20.8 \\
+      mushroom & 8,416 & 120 & 2,000 & 14 & UGenMax & 31 & 19.1 \\
+      retail & 88,162 & 16,470 & 5,000 & 4 & UFPMax & 217 & 100.0 \\
+      retail & 88,162 & 16,470 & 5,000 & 4 & UGenMax & 88 & 62.0 \\
+      accidents & 340,183 & 468 & 50,000 & 154 & UFPMax & 26,673 & 501.6 \\
+      accidents & 340,183 & 468 & 50,000 & 154 & UGenMax & 15,239 & 1,001.4 \\
       \bottomrule
     \end{tabular}
   \end{table}
 
-  \textbf{Observation:} Both algorithms scale from 8K to 340K transactions, and UGenMax retains a clear advantage at every scale (66\% faster on mushroom, 50\% faster on retail, 31\% faster on accidents in this snapshot). The retail run in particular illustrates UGenMax's memory advantage on sparse data ($\sim$37\% less memory than UFPMax).
+  \textbf{Observation:} Both algorithms scale from 8K to 340K transactions, and UGenMax retains a clear time advantage at every scale (55\% faster on mushroom, 59\% faster on retail, 43\% faster on accidents in this snapshot). The retail run in particular illustrates UGenMax's memory advantage on sparse data ($\sim$38\% less memory than UFPMax), while on very dense accidents the weighted-tidset representation becomes larger than UFPMax's projected databases ($\sim$1,001 MB vs.\ 502 MB) --- a clear time/memory trade-off that depends on dataset density.
 
   \begin{figure}[h]
     \centering
@@ -909,14 +909,14 @@ Best for & Sparse data & Dense data \\
         every node near coord/.append style={yshift=3pt},
       ]
         \addplot[fill=blue!60] coordinates {
-          (mushroom, 41)
-          (retail, 127)
-          (accidents, 11916)
+          (mushroom, 69)
+          (retail, 217)
+          (accidents, 26673)
         };
         \addplot[fill=red!60] coordinates {
-          (mushroom, 14)
-          (retail, 64)
-          (accidents, 8222)
+          (mushroom, 31)
+          (retail, 88)
+          (accidents, 15239)
         };
         \legend{UFPMax, UGenMax}
       \end{axis}
@@ -927,35 +927,73 @@ Best for & Sparse data & Dense data \\
 
   \section{Top-K Mode}
 
-Table~\ref{tab:topk} compares UGenMax and UFPMax in Top-K mode on mushroom\_medium. Both UGenMax and UFPMax support Top-K mode.
+Tables~\ref{tab:topk_mushroom}, \ref{tab:topk_retail}, and~\ref{tab:topk_accidents} compare UGenMax and UFPMax in Top-K mode on mushroom\_medium, retail\_medium, and accidents\_medium for $K \in \{5,10,20,50,100\}$. Both algorithms support Top-K mode.
 
 \begin{table}[h]
 \centering
 \caption{Top-K mode on mushroom\_medium (8,416 transactions, 120 items)}
-\label{tab:topk}
-\begin{tabular}{rrrrrrrr}
+\label{tab:topk_mushroom}
+\begin{tabular}{rrrrrrr}
 \toprule
-\textbf{K} & \multicolumn{2}{c}{\textbf{Time (ms)}} & \multicolumn{2}{c}{\textbf{Memory (MB)}} & \multicolumn{2}{c}{\textbf{Nodes Explored}} & \textbf{Final minsup} \\
- & UFPMax & UGenMax & UFPMax & UGenMax & UFPMax & UGenMax & UGenMax \\
+\textbf{K} & \multicolumn{2}{c}{\textbf{Time (ms)}} & \multicolumn{2}{c}{\textbf{Memory (MB)}} & \multicolumn{2}{c}{\textbf{Final minsup}} \\
+ & UFPMax & UGenMax & UFPMax & UGenMax & UFPMax & UGenMax \\
 \midrule
-10 & 700 & 139 & 51.7 & 17.0 & 10 & 5 & 1,975.7 \\
-20 & 725 & 144 & 24.7 & 43.6 & 17 & 6 & 1,332.9 \\
-50 & 937 & 191 & 64.5 & 44.1 & 44 & 15 & 955.1 \\
+5 & 908 & 162 & 33.9 & 21.7 & 1,711.2 & 2,451.6 \\
+10 & 954 & 146 & 48.3 & 29.5 & 1,225.8 & 1,975.7 \\
+20 & 963 & 176 & 51.0 & 32.2 & 973.7 & 1,332.9 \\
+50 & 1,178 & 298 & 20.8 & 18.7 & 613.9 & 955.1 \\
+100 & 1,323 & 443 & 40.5 & 37.3 & 477.5 & 720.8 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{Top-K mode on retail\_medium (88,162 transactions, 16,470 items)}
+\label{tab:topk_retail}
+\begin{tabular}{rrrrrrr}
+\toprule
+\textbf{K} & \multicolumn{2}{c}{\textbf{Time (ms)}} & \multicolumn{2}{c}{\textbf{Memory (MB)}} & \multicolumn{2}{c}{\textbf{Final minsup}} \\
+ & UFPMax & UGenMax & UFPMax & UGenMax & UFPMax & UGenMax \\
+\midrule
+5 & 16,604 & 594 & 203.9 & 105.0 & 936.8 & 2,248.1 \\
+10 & 17,116 & 560 & 123.4 & 102.0 & 1,124.0 & 1,630.4 \\
+20 & 17,315 & 675 & 66.3 & 108.0 & 646.8 & 741.7 \\
+50 & 18,135 & 1,531 & 106.8 & 131.0 & 320.2 & 519.8 \\
+100 & 23,936 & 4,755 & 149.2 & 101.1 & 123.7 & 260.6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{Top-K mode on accidents\_medium (340,183 transactions, 468 items). Times in seconds.}
+\label{tab:topk_accidents}
+\begin{tabular}{rrrrrrr}
+\toprule
+\textbf{K} & \multicolumn{2}{c}{\textbf{Time (s)}} & \multicolumn{2}{c}{\textbf{Memory (MB)}} & \multicolumn{2}{c}{\textbf{Final minsup}} \\
+ & UFPMax & UGenMax & UFPMax & UGenMax & UFPMax & UGenMax \\
+\midrule
+5 & 91.7 & 10.4 & 870.4 & 1,351.9 & 79,627 & 137,418 \\
+10 & 93.5 & 12.1 & 837.3 & 829.8 & 68,709 & 108,265 \\
+20 & 106.0 & 14.8 & 862.7 & 1,382.9 & 54,132 & 75,922 \\
+50 & 133.6 & 12.4 & 818.7 & 1,346.7 & 35,942 & 60,157 \\
+100 & 130.3 & 18.0 & 1,130.5 & 1,187.2 & 30,162 & 47,455 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \textbf{Key findings:}
 \begin{itemize}
-  \item UGenMax is \textbf{4--5$\times$ faster} than UFPMax in Top-K mode across all values of $K$, because its dynamic threshold raising (Pruning~3) aggressively increases minsup during search --- for example at $K{=}10$ the threshold rises from the seeded 1,226 to a final 1,976, pruning subtrees that UFPMax must still explore.
-  \item UGenMax explores far fewer nodes (5--15 vs.\ 10--44), confirming that dynamic threshold raising is highly effective.
-  \item UFPMax does not raise minsup during search (its final threshold stays at the seeded value), so it discovers many more candidate MFIs (41--192) before selecting the Top-K, whereas UGenMax's rising threshold limits candidates to 22--102.
-  \item As $K$ increases, both algorithms take longer because the threshold stabilises at a lower value, expanding the search space.
+  \item UGenMax is dramatically faster than UFPMax in Top-K mode across all three datasets and all values of $K$: roughly \textbf{3--7$\times$ faster on mushroom}, \textbf{5--30$\times$ faster on retail}, and \textbf{7--11$\times$ faster on accidents}. The advantage is largest on retail (e.g.\ 0.6 s vs.\ 16.6 s at $K{=}5$) because UFPMax must build expensive projections over 16K items while UGenMax's dynamic threshold raising prunes most of them upfront.
+  \item Dynamic threshold raising (Pruning~3) is what drives this gap: UGenMax's final minsup is consistently \emph{higher} than UFPMax's at the same $K$ (e.g.\ on mushroom at $K{=}10$: 1,976 vs.\ 1,226), which means UGenMax aggressively shrinks the search space during traversal.
+  \item As $K$ increases, both algorithms take longer because the threshold stabilises at a lower value, expanding the search space (e.g.\ on retail UGenMax goes from 0.6 s at $K{=}5$ to 4.8 s at $K{=}100$).
+  \item Memory behaviour mirrors the static-minsup results: UGenMax uses less memory than UFPMax on the sparse retail and the dense mushroom in most cases, but uses noticeably more on very dense accidents, again reflecting the cost of weighted tidsets when most transactions contain most items.
 \end{itemize}
 
   \section{Summary of Findings}
 
-  Taking the Chapter~6 results together, three findings stand out. First, correctness holds throughout: UGenMax and UFPMax produce identical MFI sets across all datasets and thresholds. Second, on the primary retail\_medium dataset UGenMax is 19--43\% faster than UFPMax and uses roughly 30--35\% less memory --- an advantage that generalises to dense mushroom (42--66\% faster) and to very dense accidents (13--36\% faster at minsup $\geq$ 30,000, essentially tied at minsup=20,000). Finally, both algorithms scale to 340K transactions (accidents) within acceptable time limits, and UGenMax additionally outperforms UFPMax in Top-K mode (4--5$\times$ faster) thanks to dynamic threshold raising.
+  Taking the Chapter~6 results together, three findings stand out. First, correctness holds throughout: UGenMax and UFPMax produce identical MFI sets across all datasets and thresholds. Second, on the primary retail\_medium dataset UGenMax is 16--33\% faster than UFPMax and uses roughly 30--38\% less memory --- a time advantage that generalises to dense mushroom (37--47\% faster on non-trivial workloads) and to very dense accidents (14--49\% faster across the full minsup range), although on accidents the weighted-tidset representation becomes larger than UFPMax's projected databases, so memory savings do not generalise to the very-dense regime. Finally, both algorithms scale to 340K transactions (accidents) within acceptable time limits, and UGenMax additionally outperforms UFPMax in Top-K mode by a substantial margin (3--7$\times$ on mushroom, 5--30$\times$ on retail, 7--11$\times$ on accidents) thanks to dynamic threshold raising.
 
 % ============================================================
 % CHAPTER 7: CONCLUSIONS
@@ -974,7 +1012,7 @@ Table~\ref{tab:topk} compares UGenMax and UFPMax in Top-K mode on mushroom\_medi
 
   \section{Limitations}
 
-  Several limitations remain. Maximality checking uses a linear scan ($O(|\text{MFI}|)$ per check), which a trie- or hash-based index could improve. Memory usage on the accidents dataset also reaches roughly 1.4\,GB at low thresholds, which may be restrictive in memory-constrained environments.
+  Several limitations remain. Maximality checking uses a linear scan ($O(|\text{MFI}|)$ per check), which a trie- or hash-based index could improve. Memory usage on the accidents dataset also reaches roughly 1.5\,GB on the densest configurations, which may be restrictive in memory-constrained environments; this is most pronounced for UGenMax, whose weighted-tidset representation grows large when most transactions contain most items.
 
   \section{Future Work}
 
