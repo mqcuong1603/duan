@@ -15,8 +15,8 @@ import java.io.IOException;
  * Supports two algorithms for mining frequent maximal itemsets
  * from uncertain transaction databases under the expected support model:
  *
- *   UFPMax  — FPMax adapted for uncertain data (2004)
- *   UGenMax — GenMax adapted for uncertain data (2005)
+ *   UFPMax  — FPMax adapted for uncertain data (Grahne & Zhu, 2003)
+ *   UGenMax — GenMax adapted for uncertain data (Gouda & Zaki, 2005)
  *
  * Both algorithms support static minsup mode and Top-K mode.
  *

@@ -15,7 +15,9 @@ import java.util.*;
  * It extends the FPMax algorithm (Grahne & Zhu, 2003) by:
  *   1. Using expected support instead of count-based support
  *   2. Using conditional database projection with probability-weighted transactions
- *   3. Supporting Top-K mode with dynamic threshold raising
+ *   3. Supporting Top-K mode via a one-shot seeded threshold plus a retry
+ *      loop. Unlike UGenMax, UFPMax does NOT raise minsup dynamically during
+ *      the search (see "Top-K behaviour" below).
  *
  * ===== BRANCH-AND-BOUND STRATEGY =====
  *
@@ -34,9 +36,24 @@ import java.util.*;
  *     If prefix ∪ {all remaining header items} ⊆ some known maximal itemset,
  *     then no new maximal itemset can be found in this subtree.
  *
- *   Pruning 3 — Top-K Threshold Raising (dynamic bound):
- *     In Top-K mode, minsup increases dynamically as the K-th best itemset
- *     improves, progressively strengthening Pruning 1.
+ *   Pruning 3 — Top-K Seeded Threshold (static bound, set once):
+ *     In Top-K mode, minsup is established before the main search by the
+ *     seeding phase (singles + 2-itemsets over the top 50 items) and then
+ *     held fixed for the remainder of that search. UFPMax does NOT update
+ *     minsup as new MFIs are discovered: its top-down, frequency-descending
+ *     traversal discovers single-item MFIs first, and feeding those high
+ *     scores back into minsup would prematurely prune the multi-item MFIs
+ *     we are actually looking for. If the search ends with fewer than K
+ *     MFIs, the outer retry loop quarters minsup and starts over with a
+ *     fresh heap (see run()).
+ *
+ * ===== Top-K behaviour =====
+ *
+ * Contrast with UGenMax: UGenMax raises minsup inside addMaximalIfNew each
+ * time a better MFI is found, which is sound because its bottom-up,
+ * frequency-ascending traversal does not surface single-item MFIs early.
+ * UFPMax cannot do the same without losing correctness on multi-item MFIs,
+ * so its only "dynamic" feedback is the outer retry-with-lower-minsup loop.
  *
  * ===== KEY DIFFERENCE FROM UGenMax =====
  *
@@ -57,7 +74,13 @@ public class UFPMax {
     /** The uncertain transaction database */
     private final UncertainDatabase database;
 
-    /** Minimum expected support threshold (may increase in Top-K mode) */
+    /**
+     * Minimum expected support threshold. In Top-K mode it is set once
+     * from the seeded threshold and held fixed for the duration of each
+     * search; it only changes between attempts of the outer retry loop
+     * (quartered each retry). It is NOT raised dynamically as new MFIs
+     * are discovered (unlike UGenMax).
+     */
     private double minsup;
 
     /** Number of top results to keep (-1 = use static minsup) */
@@ -116,7 +139,8 @@ public class UFPMax {
         }
     }
 
-    /** Returns the current minsup (raised dynamically in Top-K mode after run()). */
+    /** Returns the current minsup. In Top-K mode this is the seeded
+     *  threshold of the last retry attempt (not raised during search). */
     public double getMinsup() {
         return minsup;
     }
