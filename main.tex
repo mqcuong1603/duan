@@ -677,7 +677,7 @@ Best for & Sparse data & Dense data \\
 
   \section{Performance Measurement}
 
-  PerformanceTracker uses \texttt{System.nanoTime()} for timing and \texttt{Runtime.totalMemory() - Runtime.freeMemory()} for memory, with GC forced before each run. Each expected support experiment is averaged over 3 measured runs after 1 warm-up run.
+  PerformanceTracker uses \texttt{System.nanoTime()} for timing and \texttt{Runtime.totalMemory() - Runtime.freeMemory()} for memory, with GC forced before each run. The expected-support sweep and the Top-K sweep are each averaged over 3 measured runs after 1 warm-up run. The cross-dataset scalability snapshot is a single run, which is why the numbers in Table~\ref{tab:scalability} differ slightly from the corresponding rows of the averaged tables.
 
 % ============================================================
 % CHAPTER 6: EXPERIMENT RESULTS

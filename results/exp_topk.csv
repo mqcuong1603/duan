@@ -1,4 +1,4 @@
-git dataset,algorithm,k,mfis_found,time_ms,memory_mb,final_minsup
+dataset,algorithm,k,mfis_found,time_ms,memory_mb,final_minsup
 mushroom_medium,UFPMax,5,5,908,33.9,1711.2250
 mushroom_medium,UFPMax,10,10,954,48.3,1225.8200
 mushroom_medium,UFPMax,20,20,963,51.0,973.7111

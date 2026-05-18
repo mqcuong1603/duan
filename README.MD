@@ -58,8 +58,10 @@ item1 item2 ... #SUP: <expectedSupport>
 
 ## Generating Uncertain Datasets
 
-The `data/` directory already contains `mushroom_{high,medium,low}.txt`. To
-generate uncertain variants for `retail` and `accidents`:
+The `data/` directory ships with `mushroom_medium.txt`, `retail_medium.txt`,
+and `accidents_medium.txt`. To generate the high/low mushroom variants, or
+to (re)generate the retail/accidents uncertain variants from the raw SPMF
+datasets, run `DatasetConverter`:
 
 ```bash
 java -cp bin DatasetConverter data/retail.txt data/retail_medium.txt medium 42
@@ -107,8 +109,10 @@ java -cp bin experiment.ExpUGenMax  data/retail_medium.txt 3000
 The **benchmark suite** (`ExperimentRunner`) is the automated harness used to
 produce the numbers in the report. It runs *both algorithms* across
 *multiple datasets* (mushroom, retail, accidents) at *multiple parameter
-values*, with 1 warm-up run and 3 measured runs averaged, and writes four CSV
-files ready for plotting:
+values*. The expected-support sweep (`exp1`) and the Top-K sweep (`exp_topk`)
+each report a 1 warm-up + 3 measured runs average; the scalability snapshot
+(`exp4`) and the uncertainty comparison (`exp3`) are single-run. The suite
+writes four CSV files ready for plotting:
 
 ```bash
 java -Xmx4g -cp bin experiment.ExperimentRunner results
@@ -116,10 +120,11 @@ java -Xmx4g -cp bin experiment.ExperimentRunner results
 
 Outputs in `results/`:
 
-- `exp1_expected_support.csv` — UFPMax vs UGenMax across minsup
-- `exp3_uncertainty.csv` — high vs medium vs low uncertainty
-- `exp4_scalability.csv` — mushroom vs retail vs accidents
-- `exp_topk.csv` — UFPMax vs UGenMax across K values
+- `exp1_expected_support.csv` — UFPMax vs UGenMax across minsup (averaged)
+- `exp3_uncertainty.csv` — high vs medium vs low uncertainty on mushroom
+  (requires `mushroom_high.txt` / `mushroom_low.txt` to be generated first)
+- `exp4_scalability.csv` — mushroom vs retail vs accidents at fixed minsup
+- `exp_topk.csv` — UFPMax vs UGenMax across K values (averaged)
 
 **In short:** *examples* run the tool; *experiments* measure one algorithm;
 the *benchmark suite* runs everything and emits CSVs.
